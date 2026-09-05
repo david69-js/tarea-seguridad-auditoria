@@ -34,6 +34,11 @@ services:
       DB_NAME: pos_libreria
       DB_USER: root
       DB_PASSWORD: root
+      # Clima del dashboard (API externa OpenWeatherMap). Se toma del entorno
+      # o de un .env junto a este archivo; si falta, el dashboard lo indica
+      # y el resto del sistema funciona igual.
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
+      OPENWEATHER_CIUDAD: ${OPENWEATHER_CIUDAD:-Guatemala City,GT}
     ports:
       - "8090:80"
 

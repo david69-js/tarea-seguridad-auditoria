@@ -142,6 +142,8 @@ function dispatch(string $method, string $path): void
 route('GET',  '/',           fn() => header('Location: ' . base_url('/dashboard')));
 route('GET',  '/login',      'web_login_form');
 route('POST', '/login',      'web_login_submit');
+route('GET',  '/registro',   'web_registro_form');
+route('POST', '/registro',   'web_registro_submit');
 route('GET',  '/logout',     'web_logout');
 route('GET',  '/dashboard',  'web_dashboard');
 route('GET',  '/productos',  'web_productos');
@@ -175,6 +177,12 @@ route('POST',   '/api/productos',      'api_productos_create');
 route('PUT',    '/api/productos/{id}', 'api_productos_update');
 route('DELETE', '/api/productos/{id}', 'api_productos_delete');
 
+// --- Usuarios (gestion, solo admin) ---
+route('GET',    '/api/usuarios',      'api_usuarios_list');
+route('GET',    '/api/usuarios/{id}', 'api_usuarios_get');
+route('PUT',    '/api/usuarios/{id}', 'api_usuarios_update');
+route('DELETE', '/api/usuarios/{id}', 'api_usuarios_delete');
+
 // --- Clientes ---
 route('GET',    '/api/clientes',      'api_clientes_list');
 route('POST',   '/api/clientes',      'api_clientes_create');
@@ -191,6 +199,9 @@ route('POST', '/api/ventas/{id}/anular', 'api_ventas_anular');
 route('GET', '/api/reportes/dashboard',           'api_reportes_dashboard');
 route('GET', '/api/reportes/ventas',              'api_reportes_ventas');
 route('GET', '/api/reportes/productos-vendidos',  'api_reportes_productos_vendidos');
+
+// --- Clima (API externa: OpenWeatherMap) ---
+route('GET', '/api/clima', 'api_clima');
 
 /* ------------------------------------------------------------------ */
 dispatch($method, $path);

@@ -4,6 +4,8 @@
 
 # Dependencias
 /vendor/
+/node_modules/
+package-lock.json
 
 # Imágenes subidas por usuarios (se conserva la carpeta con .gitkeep)
 /public/uploads/*

@@ -13,6 +13,22 @@
         Require all granted
     </Directory>
 
+    # -----------------------------------------------------------------
+    #  Cache de los archivos estaticos
+    #
+    #  Sin cabecera Cache-Control el navegador aplica cache heuristica y
+    #  puede reutilizar un CSS o un JS viejo durante horas. Con HTML nuevo
+    #  y CSS viejo la interfaz se ve rota. "no-cache" no impide guardar el
+    #  archivo: obliga a revalidarlo, asi que si no cambio la respuesta es
+    #  un 304 vacio (rapido) y si cambio se descarga la version nueva.
+    #  Las URLs ademas llevan ?v=<fecha> (ver asset_url en helpers.php).
+    # -----------------------------------------------------------------
+    <IfModule mod_headers.c>
+        <LocationMatch "^/assets/">
+            Header set Cache-Control "no-cache"
+        </LocationMatch>
+    </IfModule>
+
     # El codigo de la aplicacion nunca debe servirse directamente.
     <Directory /var/www/html/app>
         Require all denied

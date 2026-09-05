@@ -1,113 +1,625 @@
 /* =====================================================================
- *  Estilos del POS Librería Escolar
- *  Tipografía: Google Fonts (Poppins + Inter)
+ *  POS Librería Escolar — Hoja de estilos
+ *  ---------------------------------------------------------------
+ *  Criterios de diseño:
+ *   · Profesional: paleta sobria, jerarquía tipográfica y espaciado
+ *     consistentes a partir de tokens (variables CSS).
+ *   · POS: densidad alta donde importa (carrito, tablas, teclado),
+ *     objetivos táctiles grandes en la rejilla de productos.
+ *   · Accesible: foco siempre visible, contraste AA, áreas táctiles
+ *     de 44px en móvil, respeto por prefers-reduced-motion.
+ *   · Responsiva: una sola columna en móvil, sidebar deslizante con
+ *     fondo oscurecido, tablas con desplazamiento horizontal.
+ *  Tipografía: Google Fonts (Poppins + Inter).
  * ===================================================================== */
+
+/* ---------------------------------------------------------------------
+ *  1. Tokens de diseño
+ * ------------------------------------------------------------------- */
 :root {
+    /* Marca */
     --primary: #4f46e5;
     --primary-dark: #4338ca;
-    --sidebar-bg: #1e293b;
-    --sidebar-hover: #334155;
-    --bg: #f1f5f9;
-    --card-radius: 14px;
+    --primary-light: #eef2ff;
+    --primary-ring: rgba(79, 70, 229, .35);
+
+    /* Estados */
+    --success: #059669;
+    --success-light: #ecfdf5;
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+    --warning: #b45309;
+    --warning-light: #fffbeb;
+    --info: #0284c7;
+    --info-light: #f0f9ff;
+
+    /* Neutros */
+    --ink: #0f172a;
+    --ink-2: #334155;
+    --muted: #5b6b82;
+    --line: #e2e8f0;
+    --surface: #ffffff;
+    --bg: #f4f6fb;
+
+    /* Barra lateral */
+    --sidebar-bg: #111a2e;
+    --sidebar-bg-2: #1b2540;
+    --sidebar-text: #cbd5e1;
+    --sidebar-line: rgba(148, 163, 184, .18);
+
+    /* Formas y elevación */
+    --radius: 14px;
+    --radius-sm: 10px;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, .06), 0 1px 3px rgba(15, 23, 42, .04);
+    --shadow: 0 2px 4px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .06);
+    --shadow-lg: 0 12px 40px rgba(15, 23, 42, .14);
+
+    --sidebar-w: 256px;
+    --topbar-h: 62px;
 }
 
-* { box-sizing: border-box; }
+/* Bootstrap usa estas variables para botones, enlaces y focus */
+:root {
+    --bs-primary: #4f46e5;
+    --bs-primary-rgb: 79, 70, 229;
+    --bs-body-color: #0f172a;
+    --bs-body-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --bs-border-color: #e2e8f0;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
 body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     background: var(--bg);
-    color: #1e293b;
+    color: var(--ink);
     margin: 0;
+    font-size: .95rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3, h4, .kpi-value, .sidebar-brand { font-family: 'Poppins', sans-serif; }
 
-/* ---------- Layout general ---------- */
+h1, h2, h3, h4, h5,
+.kpi-value, .sidebar-brand, .total-grande, .login-brand h1 {
+    font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+    letter-spacing: -.01em;
+}
+
+.text-muted { color: var(--muted) !important; }
+
+/* ---------------------------------------------------------------------
+ *  2. Accesibilidad transversal
+ * ------------------------------------------------------------------- */
+
+/* Foco visible y homogéneo en todo lo interactivo. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-ring);
+}
+
+/* Un input-group (icono + campo + botón) es un solo control a la vista, así
+   que el indicador de foco se dibuja alrededor del grupo entero: si se
+   dibujara sobre el campo suelto, el icono quedaría "despegado". */
+.input-group:focus-within {
+    border-radius: 9px;
+    box-shadow: 0 0 0 3px var(--primary-ring);
+}
+.input-group:focus-within > .form-control,
+.input-group:focus-within > .form-select,
+.input-group:focus-within > .input-group-text { border-color: var(--primary); }
+.input-group > .form-control:focus,
+.input-group > .form-select:focus { box-shadow: none; }
+.input-group > .form-control:focus-visible,
+.input-group > .form-select:focus-visible { outline: none; }
+
+/* Enlace para saltar directamente al contenido (lectores de pantalla / teclado). */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 2000;
+    background: var(--primary);
+    color: #fff;
+    padding: .7rem 1.1rem;
+    border-radius: 0 0 var(--radius-sm) 0;
+    font-weight: 600;
+    text-decoration: none;
+}
+.skip-link:focus {
+    left: 0;
+    color: #fff;
+}
+
+/* Texto solo para lectores de pantalla. */
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    overflow: hidden; clip: rect(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ---------------------------------------------------------------------
+ *  3. Estructura general
+ * ------------------------------------------------------------------- */
 .app-shell { display: flex; min-height: 100vh; }
 
 .sidebar {
-    width: 250px; background: var(--sidebar-bg); color: #cbd5e1;
-    display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0;
-    transition: transform .25s ease; z-index: 1040;
+    width: var(--sidebar-w);
+    background: linear-gradient(180deg, var(--sidebar-bg-2) 0%, var(--sidebar-bg) 100%);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    inset: 0 auto 0 0;
+    transition: transform .25s ease;
+    z-index: 1045;
 }
+
 .sidebar-brand {
-    display: flex; align-items: center; gap: .6rem; padding: 1.25rem 1.25rem;
-    font-size: 1.25rem; font-weight: 600; color: #fff; border-bottom: 1px solid #334155;
+    display: flex; align-items: center; gap: .65rem;
+    padding: 1.1rem 1.25rem;
+    font-size: 1.15rem; font-weight: 600; color: #fff;
+    border-bottom: 1px solid var(--sidebar-line);
+    text-decoration: none;
+    min-height: var(--topbar-h);
 }
-.sidebar-brand i { color: #818cf8; font-size: 1.6rem; }
-.sidebar-nav { flex-grow: 1; padding: 1rem .75rem; display: flex; flex-direction: column; gap: .25rem; }
+.sidebar-brand:hover { color: #fff; }
+.sidebar-brand i { color: #a5b4fc; font-size: 1.5rem; }
+.sidebar-brand small {
+    display: block; font-size: .7rem; font-weight: 400;
+    color: #94a3b8; letter-spacing: .04em; text-transform: uppercase;
+}
+
+.sidebar-nav {
+    flex-grow: 1; padding: .9rem .7rem;
+    display: flex; flex-direction: column; gap: .15rem;
+    overflow-y: auto;
+}
+.sidebar-heading {
+    font-size: .68rem; text-transform: uppercase; letter-spacing: .09em;
+    color: #7d8ba6; padding: .9rem .85rem .35rem; font-weight: 600;
+}
 .sidebar-nav .nav-link {
-    color: #cbd5e1; border-radius: 8px; padding: .6rem .85rem; font-size: .95rem;
-    display: flex; align-items: center; gap: .65rem; transition: background .15s;
+    color: var(--sidebar-text);
+    border-radius: var(--radius-sm);
+    padding: .62rem .85rem;
+    font-size: .92rem; font-weight: 500;
+    display: flex; align-items: center; gap: .7rem;
+    transition: background .15s, color .15s;
+    position: relative;
 }
-.sidebar-nav .nav-link:hover { background: var(--sidebar-hover); color: #fff; }
-.sidebar-nav .nav-link.active { background: var(--primary); color: #fff; font-weight: 500; }
-.sidebar-nav .nav-link i { width: 20px; text-align: center; }
-.sidebar-footer { padding: 1rem; border-top: 1px solid #334155; }
-.user-badge { display: flex; align-items: center; gap: .6rem; color: #e2e8f0; }
-.user-badge i { font-size: 1.8rem; color: #818cf8; }
-.user-badge small { color: #94a3b8; }
+.sidebar-nav .nav-link:hover { background: rgba(148, 163, 184, .14); color: #fff; }
+.sidebar-nav .nav-link.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, .4);
+}
+.sidebar-nav .nav-link i { width: 20px; text-align: center; font-size: 1.05rem; }
+.sidebar-nav .nav-link:focus-visible { outline-color: #fff; }
 
-.main-area { flex-grow: 1; margin-left: 250px; display: flex; flex-direction: column; min-width: 0; }
+.sidebar-footer { padding: .9rem; border-top: 1px solid var(--sidebar-line); }
+.user-badge {
+    display: flex; align-items: center; gap: .65rem;
+    color: #e2e8f0; padding: .5rem .25rem;
+}
+.user-avatar {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff; font-weight: 600; font-size: .95rem;
+    display: grid; place-items: center;
+}
+.user-badge .user-info { min-width: 0; }
+.user-badge strong {
+    display: block; font-size: .9rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.user-badge small { color: #94a3b8; font-size: .76rem; }
+
+.btn-logout {
+    width: 100%; margin-top: .6rem;
+    border: 1px solid var(--sidebar-line);
+    background: transparent; color: #e2e8f0;
+    border-radius: var(--radius-sm); padding: .5rem;
+    font-size: .85rem; font-weight: 500;
+    display: flex; align-items: center; justify-content: center; gap: .45rem;
+    text-decoration: none; transition: background .15s, border-color .15s;
+}
+.btn-logout:hover { background: rgba(220, 38, 38, .18); border-color: rgba(248, 113, 113, .5); color: #fff; }
+
+/* Fondo oscurecido tras el sidebar en móvil */
+.sidebar-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, .55);
+    z-index: 1040;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s ease;
+    border: 0; padding: 0;
+}
+.sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
+
+.main-area {
+    flex-grow: 1; margin-left: var(--sidebar-w);
+    display: flex; flex-direction: column; min-width: 0;
+}
+
 .topbar {
-    background: #fff; padding: .85rem 1.5rem; display: flex; align-items: center; gap: 1rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06); position: sticky; top: 0; z-index: 1020;
+    background: var(--surface);
+    padding: 0 1.25rem;
+    min-height: var(--topbar-h);
+    display: flex; align-items: center; gap: .9rem;
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 1020;
 }
-.topbar-title { font-size: 1.25rem; margin: 0; flex-grow: 1; }
-.content { padding: 1.5rem; }
+.topbar-title { font-size: 1.15rem; font-weight: 600; margin: 0; flex-grow: 1; }
+.topbar-meta {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--bg); color: var(--ink-2);
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: .3rem .8rem; font-size: .8rem; font-weight: 500;
+    white-space: nowrap;
+}
+.btn-hamburger {
+    display: none;
+    width: 40px; height: 40px;
+    border: 1px solid var(--line); background: var(--surface);
+    border-radius: var(--radius-sm); color: var(--ink);
+    font-size: 1.15rem; line-height: 1;
+}
+.content { padding: 1.35rem; flex-grow: 1; }
 
-/* ---------- Tarjetas / paneles ---------- */
-.panel { border: none; border-radius: var(--card-radius); box-shadow: 0 2px 10px rgba(15,23,42,.05); }
-.panel .card-header { font-weight: 600; border-radius: var(--card-radius) var(--card-radius) 0 0 !important; }
+/* Cabecera de sección dentro del contenido */
+.page-head {
+    display: flex; flex-wrap: wrap; gap: .75rem;
+    justify-content: space-between; align-items: center;
+    margin-bottom: 1.15rem;
+}
+.page-head .page-sub { color: var(--muted); margin: 0; font-size: .9rem; }
+/* flex:1 1 auto -> la barra ocupa el espacio libre de la cabecera y sus
+   controles caben en una sola fila, alineados a la derecha. */
+.toolbar {
+    display: flex; flex-wrap: wrap; gap: .6rem;
+    align-items: center; justify-content: flex-end;
+    flex: 1 1 auto;
+}
+/* Bootstrap da width:100% a .input-group y a los campos; dentro de la barra
+   de herramientas cada control ocupa solo lo que necesita y todos caben en
+   una fila (en móvil vuelven a ocupar el ancho completo, más abajo). */
+.toolbar > * { flex: 0 0 auto; }
+.toolbar .input-group { width: auto; flex: 0 1 320px; }
+.toolbar .input-group > .form-control { flex: 1 1 auto; width: auto; min-width: 0; }
+.toolbar .form-select { width: auto; }
 
+/* ---------------------------------------------------------------------
+ *  4. Tarjetas, tablas y estados
+ * ------------------------------------------------------------------- */
+.panel {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    background: var(--surface);
+    overflow: hidden;
+}
+.panel .card-header {
+    font-weight: 600; font-size: .95rem;
+    background: var(--surface) !important;
+    border-bottom: 1px solid var(--line);
+    padding: .85rem 1.1rem;
+    display: flex; align-items: center; gap: .5rem;
+}
+.panel .card-header i { color: var(--primary); }
+
+.table { --bs-table-color: var(--ink); margin-bottom: 0; }
+.table > :not(caption) > * > * { padding: .7rem .9rem; }
+.table thead th {
+    background: #f8fafc;
+    font-size: .74rem; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--muted); font-weight: 600;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+}
+.table tbody tr { border-color: #eef2f7; }
+.table-hover > tbody > tr:hover > * { background: var(--primary-light); }
+.table code { color: var(--ink-2); background: #f1f5f9; padding: .12rem .4rem; border-radius: 5px; font-size: .82rem; }
+
+/* Acciones de fila: iconos con área táctil suficiente */
+.row-actions { display: inline-flex; gap: .35rem; justify-content: flex-end; }
+.row-actions .btn {
+    width: 34px; height: 34px; padding: 0;
+    display: inline-grid; place-items: center;
+    border-radius: 8px;
+}
+
+.empty-state { text-align: center; color: var(--muted); padding: 2.5rem 1rem; }
+.empty-state i { font-size: 2rem; display: block; margin-bottom: .5rem; opacity: .5; }
+
+/* Píldoras de estado */
+.pill {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .22rem .6rem; border-radius: 999px;
+    font-size: .76rem; font-weight: 600; line-height: 1.4;
+}
+.pill-success { background: var(--success-light); color: #047857; }
+.pill-danger  { background: var(--danger-light);  color: #b91c1c; }
+.pill-warning { background: var(--warning-light); color: var(--warning); }
+.pill-info    { background: var(--info-light);    color: #0369a1; }
+.pill-neutral { background: #f1f5f9; color: var(--ink-2); }
+.pill-primary { background: var(--primary-light); color: var(--primary-dark); }
+
+/* ---------------------------------------------------------------------
+ *  5. KPIs y dashboard
+ * ------------------------------------------------------------------- */
 .kpi-card {
-    display: flex; align-items: center; gap: 1rem; background: #fff; padding: 1.1rem 1.25rem;
-    border-radius: var(--card-radius); box-shadow: 0 2px 10px rgba(15,23,42,.05); height: 100%;
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--surface); padding: 1.05rem 1.15rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    height: 100%;
+    transition: box-shadow .18s, transform .18s;
 }
-.kpi-icon { width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center; font-size: 1.5rem; color: #fff; flex-shrink: 0; }
-.kpi-value { font-size: 1.5rem; font-weight: 700; line-height: 1.1; }
-.kpi-label { color: #64748b; font-size: .85rem; }
-.kpi-primary .kpi-icon { background: linear-gradient(135deg, #6366f1, #4f46e5); }
-.kpi-success .kpi-icon { background: linear-gradient(135deg, #34d399, #10b981); }
-.kpi-info    .kpi-icon { background: linear-gradient(135deg, #38bdf8, #0ea5e9); }
-.kpi-warning .kpi-icon { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+.kpi-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.kpi-icon {
+    width: 50px; height: 50px; border-radius: 13px;
+    display: grid; place-items: center; font-size: 1.4rem;
+    color: #fff; flex-shrink: 0;
+}
+.kpi-value { font-size: 1.45rem; font-weight: 700; line-height: 1.15; }
+.kpi-label { color: var(--muted); font-size: .82rem; }
+.kpi-primary .kpi-icon { background: linear-gradient(135deg, #818cf8, #4f46e5); }
+.kpi-success .kpi-icon { background: linear-gradient(135deg, #34d399, #059669); }
+.kpi-info    .kpi-icon { background: linear-gradient(135deg, #38bdf8, #0284c7); }
+.kpi-warning .kpi-icon { background: linear-gradient(135deg, #fbbf24, #d97706); }
 
-/* ---------- Inventario ---------- */
-.prod-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
-.placeholder-thumb { display: grid; place-items: center; background: #e2e8f0; color: #94a3b8; }
+/* Tarjeta del clima (API OpenWeatherMap) */
+.weather-card {
+    background: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 100%);
+    color: #fff; border: none;
+    border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    padding: 1.05rem 1.15rem; height: 100%;
+    display: flex; align-items: center; gap: 1rem;
+}
+.weather-card img { width: 56px; height: 56px; flex-shrink: 0; filter: drop-shadow(0 3px 6px rgba(0,0,0,.25)); }
+.weather-temp { font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-family: 'Poppins', sans-serif; }
+.weather-desc { font-size: .85rem; opacity: .92; }
+.weather-meta { font-size: .76rem; opacity: .8; }
+.weather-card.is-off {
+    background: var(--surface); color: var(--muted);
+    border: 1px dashed var(--line);
+}
 
-/* ---------- POS ---------- */
-.pos-layout { min-height: calc(100vh - 130px); }
-.pos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .75rem; align-content: start; max-height: calc(100vh - 200px); overflow: auto; }
+/* Bloques de carga (evitan el salto de contenido) */
+.skeleton {
+    background: linear-gradient(90deg, #eef2f7 25%, #e2e8f0 37%, #eef2f7 63%);
+    background-size: 400% 100%;
+    animation: skeleton 1.3s ease infinite;
+    border-radius: 6px; color: transparent;
+}
+@keyframes skeleton { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+.chart-box { position: relative; min-height: 220px; }
+
+/* ---------------------------------------------------------------------
+ *  6. Inventario
+ * ------------------------------------------------------------------- */
+.prod-thumb {
+    width: 46px; height: 46px; border-radius: var(--radius-sm);
+    object-fit: cover; border: 1px solid var(--line); background: #fff;
+}
+.placeholder-thumb {
+    display: grid; place-items: center;
+    background: #f1f5f9; color: #94a3b8; font-size: 1.1rem;
+}
+.prod-nombre { font-weight: 600; }
+.prod-desc {
+    color: var(--muted); font-size: .8rem;
+    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+    overflow: hidden; max-width: 32ch;
+}
+
+/* ---------------------------------------------------------------------
+ *  7. Punto de venta (POS)
+ * ------------------------------------------------------------------- */
+.pos-layout { align-items: stretch; }
+.pos-panel { display: flex; flex-direction: column; height: calc(100vh - var(--topbar-h) - 2.7rem); min-height: 480px; }
+.pos-scroll { flex: 1 1 auto; overflow-y: auto; }
+
+.pos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: .7rem; align-content: start; padding: 1rem;
+}
 .pos-item {
-    border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; padding: .75rem; text-align: left;
-    cursor: pointer; transition: all .15s; display: flex; flex-direction: column; gap: .2rem;
+    border: 1px solid var(--line); border-radius: var(--radius-sm);
+    background: var(--surface); padding: .75rem; text-align: left;
+    cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .15s;
+    display: flex; flex-direction: column; gap: .15rem;
+    min-height: 96px;
 }
-.pos-item:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(79,70,229,.15); transform: translateY(-2px); }
-.pos-item.agotado { opacity: .5; cursor: not-allowed; }
-.pos-item-nombre { font-weight: 600; font-size: .9rem; line-height: 1.2; }
-.pos-item-precio { color: var(--primary); font-weight: 700; }
-.pos-item-stock { font-size: .78rem; }
-.totales { font-size: .95rem; }
-.total-grande { font-size: 1.3rem; font-weight: 700; color: #0f172a; }
-
-/* ---------- Login ---------- */
-.login-page {
-    min-height: 100vh; display: grid; place-items: center;
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 1rem;
+.pos-item:hover:not(:disabled) {
+    border-color: var(--primary);
+    box-shadow: 0 6px 18px rgba(79, 70, 229, .16);
+    transform: translateY(-2px);
 }
-.login-card { background: #fff; border-radius: 18px; padding: 2.5rem; width: 100%; max-width: 410px; }
-.login-brand { text-align: center; margin-bottom: 1.5rem; }
-.login-brand i { font-size: 2.5rem; color: var(--primary); }
-.login-brand h2 { font-size: 1.4rem; margin: .5rem 0 0; }
-.login-brand p { color: #64748b; margin: 0; }
-.login-hint { margin-top: 1.25rem; padding: .75rem; background: #f1f5f9; border-radius: 8px; font-size: .8rem; color: #475569; text-align: center; }
+.pos-item:disabled { opacity: .55; cursor: not-allowed; }
+.pos-item-nombre {
+    font-weight: 600; font-size: .88rem; line-height: 1.25; color: var(--ink);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.pos-item-codigo { font-size: .72rem; color: var(--muted); }
+.pos-item-precio { color: var(--primary); font-weight: 700; font-size: 1rem; margin-top: auto; }
+.pos-item-stock { font-size: .74rem; font-weight: 500; }
 
-/* ---------- Botones ---------- */
+/* Carrito */
+.cart-table td { vertical-align: middle; }
+.qty-group { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.qty-group button {
+    width: 30px; height: 30px; border: 0; background: #f8fafc; color: var(--ink-2);
+    font-size: 1rem; line-height: 1; display: grid; place-items: center;
+}
+.qty-group button:hover { background: var(--primary-light); color: var(--primary-dark); }
+.qty-group .qty { min-width: 34px; text-align: center; font-weight: 600; font-size: .9rem; }
+
+.totales { font-size: .92rem; display: grid; gap: .35rem; }
+.totales .fila { display: flex; justify-content: space-between; align-items: center; }
+.total-grande { font-size: 1.4rem; font-weight: 700; color: var(--ink); }
+.btn-cobrar { font-size: 1.05rem; font-weight: 600; padding: .75rem; border-radius: var(--radius-sm); }
+
+/* ---------------------------------------------------------------------
+ *  8. Autenticación (login / registro)
+ * ------------------------------------------------------------------- */
+.auth-page {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    gap: 1.25rem;
+    background:
+        radial-gradient(1100px 500px at 12% -10%, rgba(129, 140, 248, .45), transparent 60%),
+        linear-gradient(135deg, #312e81 0%, #4f46e5 55%, #6d28d9 100%);
+    padding: 1.5rem 1rem;
+}
+.auth-card {
+    background: var(--surface); border-radius: 20px;
+    padding: 2.25rem 2rem; width: 100%; max-width: 430px;
+    box-shadow: var(--shadow-lg);
+}
+.auth-brand { text-align: center; margin-bottom: 1.6rem; }
+.auth-logo {
+    width: 58px; height: 58px; margin: 0 auto .75rem;
+    border-radius: 16px; display: grid; place-items: center;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff; font-size: 1.65rem;
+    box-shadow: 0 8px 22px rgba(79, 70, 229, .35);
+}
+.auth-brand h1 { font-size: 1.3rem; margin: 0; font-weight: 600; }
+.auth-brand p { color: var(--muted); margin: .2rem 0 0; font-size: .88rem; }
+
+.auth-card .form-label { font-weight: 500; font-size: .88rem; margin-bottom: .3rem; }
+.auth-card .input-group-text { background: #f8fafc; border-right: 0; color: var(--muted); }
+.auth-card .input-group .form-control { border-left: 0; padding-left: 0; }
+.auth-card .input-group .form-control:focus { border-color: var(--line); box-shadow: none; }
+
+.btn-toggle-pass {
+    border: 1px solid var(--line); border-left: 0;
+    background: #f8fafc; color: var(--muted);
+    border-radius: 0 9px 9px 0;
+    width: 46px;
+}
+.btn-toggle-pass:hover { color: var(--primary); background: var(--primary-light); }
+
+.auth-submit { padding: .7rem; font-weight: 600; font-size: 1rem; border-radius: var(--radius-sm); }
+.auth-alt { text-align: center; margin-top: 1.3rem; font-size: .88rem; color: var(--muted); }
+.auth-alt a { color: var(--primary); font-weight: 600; text-decoration: none; }
+.auth-alt a:hover { text-decoration: underline; }
+.auth-foot { text-align: center; margin-top: 1.5rem; font-size: .76rem; color: rgba(255, 255, 255, .8); }
+
+.form-hint { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
+
+/* ---------------------------------------------------------------------
+ *  9. Botones y controles
+ * ------------------------------------------------------------------- */
+.btn { font-weight: 500; border-radius: 9px; }
+.btn i { line-height: 1; }
 .btn-primary { background: var(--primary); border-color: var(--primary); }
-.btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+.btn-primary:hover, .btn-primary:focus { background: var(--primary-dark); border-color: var(--primary-dark); }
+.btn-success { background: var(--success); border-color: var(--success); }
+.btn-success:hover, .btn-success:focus { background: #047857; border-color: #047857; }
+.btn-outline-primary { color: var(--primary); border-color: #c7d2fe; }
+.btn-outline-primary:hover { background: var(--primary); border-color: var(--primary); }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 768px) {
-    .sidebar { transform: translateX(-100%); }
+.form-control, .form-select { border-color: #d7dee8; border-radius: 9px; }
+.form-control::placeholder { color: #94a3b8; }
+.input-group-text { border-color: #d7dee8; border-radius: 9px; }
+
+/* Dentro de un input-group los extremos internos van a escuadra, para que
+   el icono, el campo y el botón se lean como un solo control. */
+.input-group > :not(:last-child) {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+.input-group > :not(:first-child) {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+.modal-content { border: none; border-radius: var(--radius); box-shadow: var(--shadow-lg); }
+.modal-header, .modal-footer { border-color: var(--line); }
+.modal-title { font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; gap: .5rem; }
+.modal-title i { color: var(--primary); }
+
+/* Notificaciones */
+.toast { border-radius: var(--radius-sm); box-shadow: var(--shadow); }
+
+/* ---------------------------------------------------------------------
+ * 10. Responsive
+ * ------------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+    .pos-panel { height: auto; min-height: 0; }
+    .pos-scroll { max-height: 55vh; }
+}
+
+@media (max-width: 767.98px) {
+    .sidebar { transform: translateX(-100%); box-shadow: var(--shadow-lg); }
     .sidebar.open { transform: translateX(0); }
     .main-area { margin-left: 0; }
+    .btn-hamburger { display: inline-grid; place-items: center; }
+    .content { padding: 1rem .85rem; }
+    .topbar { padding: 0 .85rem; }
+    .topbar-title { font-size: 1.02rem; }
+    .topbar-meta { display: none; }
+
+    .page-head { align-items: stretch; }
+    .toolbar { width: 100%; justify-content: stretch; }
+    .toolbar > * { flex: 1 1 auto; }
+    .toolbar .input-group { width: 100%; max-width: none !important; }
+    .toolbar .form-control, .toolbar .form-select { width: 100%; min-width: 0 !important; }
+
+    /* Áreas táctiles cómodas en pantallas pequeñas */
+    .btn, .form-control, .form-select { min-height: 44px; }
+    .row-actions .btn { width: 40px; height: 40px; }
+    .pos-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); padding: .75rem; }
+    .kpi-value { font-size: 1.25rem; }
+    .kpi-icon { width: 44px; height: 44px; font-size: 1.2rem; }
 }
+
+@media (max-width: 400px) {
+    .kpi-card { flex-direction: column; align-items: flex-start; gap: .5rem; }
+}
+
+/* ---------------------------------------------------------------------
+ * 11. Impresión (reportes y facturas)
+ * ------------------------------------------------------------------- */
+@media print {
+    .sidebar, .topbar, .sidebar-backdrop, .no-print,
+    .toolbar, .btn, .toast-container { display: none !important; }
+    .main-area { margin-left: 0; }
+    .content { padding: 0; }
+    body { background: #fff; }
+    .panel { box-shadow: none; border: 1px solid #cbd5e1; break-inside: avoid; }
+    .kpi-card { box-shadow: none; border: 1px solid #cbd5e1; }
+    a[href]::after { content: ""; }
+}
+
+/* Bootstrap tiene clases de display con !important; esta regla garantiza
+   que el atributo hidden (usado por aplicarPermisos) siempre gane. */
+[hidden] { display: none !important; }

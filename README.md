@@ -18,7 +18,7 @@ gráficas, autenticación con roles y una **API REST propia** documentada.
 | Base de datos | **MySQL 8 / MariaDB** |
 | Autenticación | Sesiones PHP + **bcrypt** (`password_hash`), roles admin/cajero |
 | API REST | JSON + métodos HTTP + códigos de estado |
-| APIs externas | **QR Code** (api.qrserver.com) · **Chart.js** · **Google Fonts** |
+| APIs externas | **QR Code** (api.qrserver.com) · **OpenWeatherMap** · **Chart.js** · **Google Fonts** |
 | Contenedores | Docker + Docker Compose |
 | Hosting | Railway.app (PHP + MySQL) |
 
@@ -46,6 +46,25 @@ La base de datos se crea y se llena automáticamente con `database/pos_libreria.
 > El **admin** puede gestionar inventario, clientes, usuarios y anular ventas.
 > El **cajero** puede vender y consultar, pero no administrar el catálogo.
 
+Los usuarios de prueba **no se muestran en la pantalla de login**: los campos
+llegan vacíos, como en un sistema real. Desde `/registro` cualquiera puede
+crear su propia cuenta (siempre con rol *cajero*).
+
+### Clima del dashboard (OpenWeatherMap)
+
+El dashboard muestra el clima actual usando la API gratuita de OpenWeatherMap.
+La clave se consulta **desde el servidor**, así que nunca viaja al navegador:
+
+```bash
+export OPENWEATHER_API_KEY=su_clave_gratuita   # openweathermap.org/api_keys
+export OPENWEATHER_CIUDAD="Guatemala City,GT"  # opcional
+docker compose up --build
+```
+
+Sin la clave el sistema funciona igual: la tarjeta del dashboard indica que el
+clima no está configurado. La respuesta se cachea 15 minutos para no gastar la
+cuota gratuita en cada recarga.
+
 ---
 
 ## 📁 Estructura del proyecto
@@ -61,7 +80,8 @@ La base de datos se crea y se llena automáticamente con `database/pos_libreria.
 │   ├── config.php           # Configuración (lee variables de entorno)
 │   ├── db.php               # Conexión PDO
 │   ├── helpers.php          # JSON, auth, roles, render de vistas
-│   ├── controllers/         # Lógica: auth, productos, ventas, reportes...
+│   ├── controllers/         # Lógica: auth, usuarios, productos, ventas,
+│   │                        #         reportes, clima...
 │   └── views/               # Vistas (Bootstrap): dashboard, pos, factura...
 ├── database/
 │   └── pos_libreria.sql     # Script SQL: estructura + datos de prueba
@@ -120,6 +140,19 @@ Los endpoints marcados con 🔒 requieren sesión; los marcados con 👑 requier
 | `PUT`    | `/api/categorias/{id}` 👑 | Actualiza categoría | `200`, `404` |
 | `DELETE` | `/api/categorias/{id}` 👑 | Elimina categoría | `200`, `404` |
 
+### Usuarios (gestión, solo admin)
+
+| Método | Endpoint | Descripción | Códigos |
+|--------|----------|-------------|---------|
+| `GET`    | `/api/usuarios` 👑 | Lista/busca usuarios. Query: `?q=` | `200`, `403` |
+| `GET`    | `/api/usuarios/{id}` 👑 | Detalle de un usuario | `200`, `404` |
+| `PUT`    | `/api/usuarios/{id}` 👑 | Edita nombre, correo, rol, estado y (opcionalmente) contraseña | `200`, `404`, `409`, `422` |
+| `DELETE` | `/api/usuarios/{id}` 👑 | Elimina el usuario; si tiene ventas, lo desactiva | `200`, `404`, `409` |
+
+> El alta se hace con `POST /api/auth/register`. El servidor impide que un
+> administrador se quite el rol, se desactive o se elimine a sí mismo, y que el
+> sistema se quede sin ningún administrador activo (`409`).
+
 ### Clientes
 
 | Método | Endpoint | Descripción | Códigos |
@@ -145,6 +178,31 @@ Los endpoints marcados con 🔒 requieren sesión; los marcados con 👑 requier
 | `GET` | `/api/reportes/dashboard` 🔒 | KPIs + ventas por día/mes + top productos | `200` |
 | `GET` | `/api/reportes/ventas` 🔒 | Reporte por rango. Query: `?desde=&hasta=` | `200` |
 | `GET` | `/api/reportes/productos-vendidos` 🔒 | Ranking de productos más vendidos | `200` |
+
+### Clima (API externa)
+
+| Método | Endpoint | Descripción | Códigos |
+|--------|----------|-------------|---------|
+| `GET` | `/api/clima` 🔒 | Clima actual de la ciudad configurada (OpenWeatherMap) | `200`, `401`, `502`, `503` |
+
+Respuesta (`200 OK`):
+
+```json
+{
+  "ok": true,
+  "mensaje": "Clima actual.",
+  "data": {
+    "ciudad": "Guatemala City", "pais": "GT",
+    "temperatura": 23.4, "sensacion": 24.1,
+    "humedad": 72, "viento": 11.2,
+    "descripcion": "Nubes dispersas", "icono": "03d",
+    "actualizado": "14:05"
+  }
+}
+```
+
+Devuelve `503` si no hay `OPENWEATHER_API_KEY` configurada y `502` si el
+servicio externo falla o rechaza la consulta.
 
 ### Ejemplos de uso
 
@@ -196,6 +254,14 @@ Ver la guía paso a paso en [`docs/DESPLIEGUE_RAILWAY.md`](docs/DESPLIEGUE_RAILW
 - **Control por roles**: acciones de administración exigen rol admin (`403` si no).
 - `session_regenerate_id()` al iniciar sesión → previene fijación de sesión.
 - Las imágenes subidas **no pueden ejecutarse como PHP** (`.htaccess` en `/uploads`).
+- El **login no revela credenciales**: los campos van vacíos y no hay usuarios de
+  ejemplo impresos en la página.
+- **Validación en el servidor** además de la del navegador (registro y edición de
+  usuarios): formato de correo, longitud de contraseña, correo único.
+- Reglas de negocio que la interfaz no puede saltarse: un administrador no puede
+  degradarse, desactivarse ni borrarse a sí mismo, y siempre debe quedar al menos
+  un administrador activo.
+- La **clave de OpenWeather se usa solo en el servidor**; el navegador nunca la ve.
 
 ---
 
