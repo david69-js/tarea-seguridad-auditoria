@@ -1,4 +1,4 @@
-# Diagrama de Flujo — POS Web (Tienda El Estudiante)
+# Diagrama de Flujo — POS Web (Tienda Bugambilias)
 
 Documento que explica **cómo funciona la aplicación**: el ciclo de vida de una
 petición, la autenticación por roles y el flujo del proceso central (registrar
@@ -39,7 +39,7 @@ flowchart LR
         DBP["db.php (PDO singleton)"]
     end
 
-    DB[("🗄️ MySQL<br/>pos_libreria")]
+    DB[("🗄️ MySQL<br/>pos_tienda")]
     QR["🌐 API externa QR<br/>api.qrserver.com"]
 
     Usuario --> HTML

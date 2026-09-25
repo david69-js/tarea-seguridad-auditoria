@@ -1,4 +1,4 @@
-# Manual de Usuario — POS Librería Escolar
+# Manual de Usuario — POS Tienda Bugambilias
 
 Guía básica para usar el sistema de punto de venta.
 
@@ -12,8 +12,8 @@ Guía básica para usar el sistema de punto de venta.
 
 | Rol | Correo de prueba | Contraseña | Qué puede hacer |
 |-----|------------------|-----------|------------------|
-| Administrador | `admin@libreria.com` | `admin123` | Todo: inventario, ventas, clientes, usuarios, anular ventas |
-| Cajero | `cajero@libreria.com` | `cajero123` | Vender, ver inventario, clientes y reportes |
+| Administrador | `admin@tienda.com` | `admin123` | Todo: inventario, ventas, clientes, usuarios, anular ventas |
+| Cajero | `cajero@tienda.com` | `cajero123` | Vender, ver inventario, clientes y reportes |
 
 > Los campos del login llegan **vacíos**: por seguridad, el sistema no muestra
 > ninguna credencial en pantalla. Estas cuentas de prueba solo están en la

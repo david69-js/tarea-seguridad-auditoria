@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import { EMPRESA } from '../lib/config';
 import { useTitulo } from '../lib/useTitulo';
 
 const MENU = [
@@ -42,7 +43,7 @@ export default function Layout() {
     const hamburguesa = useRef(null);
 
     const actual = MENU.find((m) => pathname.startsWith(m.ruta));
-    const titulo = actual?.titulo ?? 'POS Librería';
+    const titulo = actual?.titulo ?? EMPRESA;
     useTitulo(titulo);
 
     // Navegar cierra el menú (en móvil queda encima del contenido).
@@ -74,8 +75,8 @@ export default function Layout() {
             <div className="app-shell">
                 <aside className={`sidebar ${menuAbierto ? 'open' : ''}`} id="sidebar" ref={sidebar} aria-label="Menú principal">
                     <Link className="sidebar-brand" to="/dashboard">
-                        <i className="bi bi-book-half" aria-hidden="true"></i>
-                        <span>POS Librería<small>El Estudiante</small></span>
+                        <i className="bi bi-shop" aria-hidden="true"></i>
+                        <span>Bugambilias<small>Tienda · punto de venta</small></span>
                     </Link>
 
                     <nav className="sidebar-nav" aria-label="Secciones del sistema">

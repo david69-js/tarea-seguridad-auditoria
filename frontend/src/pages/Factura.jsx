@@ -25,14 +25,14 @@ export default function Factura() {
     }, [id]);
 
     useEffect(() => {
-        if (venta) document.title = `Factura #${folio(venta.id)} · POS Librería`;
+        if (venta) document.title = `Factura #${folio(venta.id)} · ${EMPRESA}`;
     }, [venta]);
 
     if (venta === undefined) return <p className="text-center text-muted">Cargando factura…</p>;
     if (venta === null) return <NoEncontrado />;
 
     const numero = folio(venta.id);
-    const qrData = 'Factura POS Libreria\n'
+    const qrData = `Factura ${EMPRESA}\n`
         + `No: ${numero}\n`
         + `Fecha: ${venta.fecha}\n`
         + `Total: Q ${venta.total.toFixed(2)}\n`
@@ -42,7 +42,7 @@ export default function Factura() {
     return (
         <main className="factura">
             <div className="text-center">
-                <div className="logo" aria-hidden="true"><i className="bi bi-book-half"></i></div>
+                <div className="logo" aria-hidden="true"><i className="bi bi-shop"></i></div>
                 <h1>{EMPRESA}</h1>
                 <div className="muted">Punto de Venta · Guatemala</div>
             </div>

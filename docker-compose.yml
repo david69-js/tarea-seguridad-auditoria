@@ -1,7 +1,7 @@
 # =====================================================================
 #  Entorno de desarrollo local (equivalente a Railway):
 #    - web:         aplicación PHP + Apache (Dockerfile)
-#    - db:          MySQL 8, carga automáticamente database/pos_libreria.sql
+#    - db:          MySQL 8, carga automáticamente database/pos_tienda.sql
 #    - phpmyadmin:  administrador web de la base de datos
 #
 #  Uso:         docker compose up --build
@@ -17,11 +17,11 @@ services:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: pos_libreria
+      MYSQL_DATABASE: pos_tienda
     ports:
       - "3309:3306"
     volumes:
-      - ./database/pos_libreria.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./database/pos_tienda.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
       - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
@@ -37,7 +37,7 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: "3306"
-      DB_NAME: pos_libreria
+      DB_NAME: pos_tienda
       DB_USER: root
       DB_PASSWORD: root
       # Clima del dashboard (API externa OpenWeatherMap). Se toma del entorno

@@ -86,7 +86,7 @@ export default function Productos() {
     return (
         <>
             <div className="page-head">
-                <p className="page-sub">Catálogo de la librería. Los productos con menos de 5 unidades se marcan en rojo.</p>
+                <p className="page-sub">Catálogo de la tienda. Los productos con menos de 5 unidades se marcan en rojo.</p>
                 <div className="toolbar">
                     <label className="visually-hidden" htmlFor="buscador">Buscar producto por nombre o código</label>
                     <div className="input-group" style={{ maxWidth: 320 }}>

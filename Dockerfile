@@ -1,5 +1,5 @@
 # =====================================================================
-#  Imagen para el POS Libreria (PHP 8.3 + Apache)
+#  Imagen para el POS Tienda Bugambilias (PHP 8.3 + Apache)
 #  Funciona igual en local (docker compose) y en Railway.app
 #
 #  Dos etapas:

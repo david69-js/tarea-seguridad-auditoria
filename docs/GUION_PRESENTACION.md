@@ -16,7 +16,7 @@ Objetivo del rubro: **demo en vivo sin errores + explicar la arquitectura y el c
 ## Minuto a minuto
 
 **0:00 – 1:00 · Introducción**
-- "Es un POS web para una librería y papelería escolar, hecho con PHP 8, MySQL y Bootstrap 5, desplegado en Railway."
+- "Es un POS web para una tienda familiar, la Tienda Bugambilias, hecho con PHP 8, MySQL y Bootstrap 5, desplegado en Railway."
 - Mencionar los 3 servicios externos: QR, Chart.js y Google Fonts.
 
 **1:00 – 2:30 · Login y seguridad**

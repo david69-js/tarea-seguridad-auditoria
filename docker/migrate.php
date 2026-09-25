@@ -76,7 +76,7 @@ try {
         exit(0);
     }
 
-    $ruta = __DIR__ . '/../database/pos_libreria.sql';
+    $ruta = __DIR__ . '/../database/pos_tienda.sql';
     $sql = file_get_contents($ruta);
     if ($sql === false || trim($sql) === '') {
         log_mig('No se pudo leer ' . $ruta);

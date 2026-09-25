@@ -14,7 +14,7 @@ exportarlo a PDF, o convertir este Markdown directamente.
 >
 > **Proyecto No. 1**
 > Sistema de Punto de Venta (POS) Web
-> **Librería y Papelería Escolar**
+> **Tienda Bugambilias**
 >
 > Estudiante: _(tu nombre y carné)_
 > Catedrático: M.Sc. Elmer Rolando Lux Laynez
@@ -24,9 +24,9 @@ exportarlo a PDF, o convertir este Markdown directamente.
 
 ## 1. Descripción del proyecto
 
-Sistema de Punto de Venta (POS) web para una **librería y papelería escolar**,
+Sistema de Punto de Venta (POS) web para una **tienda familiar** (Tienda Bugambilias),
 desarrollado con **PHP 8.3, MySQL y Bootstrap 5**. Permite administrar el
-inventario de productos escolares, registrar ventas con cálculo automático de
+inventario de productos de la tienda, registrar ventas con cálculo automático de
 IVA (12%) y descuentos, generar facturas imprimibles con **código QR**,
 administrar clientes y usuarios, y visualizar reportes con gráficas.
 

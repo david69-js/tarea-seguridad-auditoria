@@ -36,7 +36,7 @@ await captura('00-login');
 
 // Sesión de administrador. Se teclea en los campos (en vez de asignar
 // .value) porque React solo ve lo que llega por eventos de teclado.
-await page.type('#correo', 'admin@libreria.com');
+await page.type('#correo', 'admin@tienda.com');
 await page.type('#password', 'admin123');
 await Promise.all([page.waitForSelector('.sidebar'), page.click('button[type=submit]')]);
 

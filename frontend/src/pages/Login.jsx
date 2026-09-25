@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import { EMPRESA } from '../lib/config';
 import AuthLayout from '../components/AuthLayout';
 import Alerta from '../components/Alerta';
 import CampoPassword from '../components/CampoPassword';
@@ -37,7 +38,7 @@ export default function Login() {
     };
 
     return (
-        <AuthLayout icono="bi-book-half" titulo="Librería El Estudiante" subtitulo="Sistema de Punto de Venta"
+        <AuthLayout icono="bi-shop" titulo={EMPRESA} subtitulo="Sistema de Punto de Venta"
                     tituloPestana="Iniciar sesión">
             {registrado && !error && <Alerta ok>Cuenta creada correctamente. Ya puede iniciar sesión.</Alerta>}
             {error && <Alerta>{error}</Alerta>}
@@ -48,7 +49,7 @@ export default function Login() {
                     <div className="input-group">
                         <span className="input-group-text"><i className="bi bi-envelope" aria-hidden="true"></i></span>
                         <input type="email" id="correo" name="correo" className="form-control"
-                               required autoFocus autoComplete="username" placeholder="usuario@libreria.com"
+                               required autoFocus autoComplete="username" placeholder="usuario@tienda.com"
                                value={correo} onChange={(e) => setCorreo(e.target.value)} />
                     </div>
                 </div>

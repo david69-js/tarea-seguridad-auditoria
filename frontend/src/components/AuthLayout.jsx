@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
+import { EMPRESA } from '../lib/config';
 
 /** Marco común de las pantallas de login y registro (sin menú lateral). */
 export default function AuthLayout({ icono, titulo, subtitulo, tituloPestana, children }) {
     useEffect(() => {
-        document.title = `${tituloPestana} · POS Librería`;
+        document.title = `${tituloPestana} · ${EMPRESA}`;
         document.body.classList.add('auth-page');
         return () => document.body.classList.remove('auth-page');
     }, [tituloPestana]);
@@ -18,7 +19,7 @@ export default function AuthLayout({ icono, titulo, subtitulo, tituloPestana, ch
                 </div>
                 {children}
             </main>
-            <p className="auth-foot">© {new Date().getFullYear()} Librería y Papelería El Estudiante · Guatemala</p>
+            <p className="auth-foot">© {new Date().getFullYear()} {EMPRESA} · Guatemala</p>
         </>
     );
 }

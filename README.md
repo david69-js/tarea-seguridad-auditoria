@@ -1,9 +1,9 @@
-# 📚 Sistema de Punto de Venta (POS) Web — Librería y Papelería Escolar
+# 🏪 Sistema de Punto de Venta (POS) Web — Tienda Bugambilias
 
 Proyecto del curso **Seguridad y Auditoría de Sistemas (PHP y MySQL)**
 Universidad Mariano Gálvez de Guatemala · Ciclo 2026
 
-Sistema de Punto de Venta web **full-stack** para una librería/papelería escolar:
+Sistema de Punto de Venta web **full-stack** para una tienda familiar (Tienda Bugambilias):
 inventario, ventas con carrito e IVA, factura con **código QR**, dashboard con
 gráficas, autenticación con roles y una **API REST propia** documentada.
 
@@ -34,14 +34,14 @@ docker compose up --build
 
 Luego abrir <http://localhost:8091>
 
-La base de datos se crea y se llena automáticamente con `database/pos_libreria.sql`.
+La base de datos se crea y se llena automáticamente con `database/pos_tienda.sql`.
 
 ### Usuarios de prueba
 
 | Rol | Correo | Contraseña |
 |-----|--------|-----------|
-| Administrador | `admin@libreria.com` | `admin123` |
-| Cajero | `cajero@libreria.com` | `cajero123` |
+| Administrador | `admin@tienda.com` | `admin123` |
+| Cajero | `cajero@tienda.com` | `cajero123` |
 
 > El **admin** puede gestionar inventario, clientes, usuarios y anular ventas.
 > El **cajero** puede vender y consultar, pero no administrar el catálogo.
@@ -113,7 +113,7 @@ frontend en una etapa con Node y copia solo el resultado a la imagen PHP.
 │   └── controllers/         # Lógica: auth, usuarios, productos, ventas,
 │                            #         reportes, clima...
 ├── database/
-│   └── pos_libreria.sql     # Script SQL: estructura + datos de prueba
+│   └── pos_tienda.sql     # Script SQL: estructura + datos de prueba
 ├── docs/                    # Manual, diagrama ER, guía de despliegue
 ├── pruebas/                 # Pruebas de caja negra de la API (Jest)
 ├── Dockerfile               # Build de React (Node) + PHP 8.3 + Apache
@@ -240,7 +240,7 @@ servicio externo falla o rechaza la consulta.
 ```bash
 curl -c cookies.txt -X POST http://localhost:8091/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"correo":"admin@libreria.com","password":"admin123"}'
+  -d '{"correo":"admin@tienda.com","password":"admin123"}'
 ```
 
 **Registrar una venta**

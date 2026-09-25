@@ -1,5 +1,5 @@
 -- =====================================================================
---  Sistema de Punto de Venta (POS) Web  -  Libreria y Papeleria Escolar
+--  Sistema de Punto de Venta (POS) Web  -  Tienda Bugambilias
 --  Universidad Mariano Galvez de Guatemala
 --  Seguridad y Auditoria de Sistemas - PHP y MySQL
 --
@@ -8,8 +8,8 @@
 --  Moneda: Quetzales (GTQ)  |  IVA: 12%
 --
 --  Usuarios de prueba (contrasena en texto plano solo para pruebas):
---    - admin@libreria.com   / admin123    (rol: admin)
---    - cajero@libreria.com  / cajero123   (rol: cajero)
+--    - admin@tienda.com   / admin123    (rol: admin)
+--    - cajero@tienda.com  / cajero123   (rol: cajero)
 -- =====================================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -142,83 +142,85 @@ CREATE TABLE pagos (
 
 -- Usuarios (password: admin123 / cajero123 - hasheadas con bcrypt)
 INSERT INTO usuarios (nombre, correo, password_hash, rol) VALUES
-('Administrador', 'admin@libreria.com',  '$2y$10$7P1Wp9lqVUwjDNdzEZXlDupx.er7chfInCau1AGg1Ke2Wymc81gLa', 'admin'),
-('Cajero Uno',    'cajero@libreria.com', '$2y$10$ppm.DoHIAvhcccN1H60QdO.4ETHYJrDwnvNqx29Zdhi8mDUOo.J.C', 'cajero');
+('Administrador', 'admin@tienda.com',  '$2y$10$7P1Wp9lqVUwjDNdzEZXlDupx.er7chfInCau1AGg1Ke2Wymc81gLa', 'admin'),
+('Cajero Uno',    'cajero@tienda.com', '$2y$10$ppm.DoHIAvhcccN1H60QdO.4ETHYJrDwnvNqx29Zdhi8mDUOo.J.C', 'cajero');
 
 -- Categorias
 INSERT INTO categorias (nombre, descripcion) VALUES
-('Libros',              'Libros de texto, literatura y lectura'),
-('Cuadernos',           'Cuadernos y libretas escolares'),
-('Utiles de Escritura', 'Lapices, lapiceros, marcadores y correctores'),
-('Papeleria',           'Hojas, folders, sobres y articulos de oficina'),
-('Arte y Manualidades', 'Crayones, temperas, pinceles y material de arte'),
-('Mochilas y Loncheras', 'Mochilas, loncheras y accesorios escolares'),
-('Tecnologia Escolar',  'Calculadoras, memorias USB y accesorios');
+('Bebidas',            'Agua pura, gaseosas, jugos y cafe'),
+('Granos Basicos',     'Frijol, arroz, azucar y harina de maiz'),
+('Abarrotes',          'Aceite, pastas, enlatados y condimentos'),
+('Lacteos y Huevos',   'Leche, queso, crema y huevos'),
+('Snacks y Dulces',    'Galletas, boquitas y golosinas'),
+('Limpieza del Hogar', 'Detergentes, cloro y jabones para el hogar'),
+('Cuidado Personal',   'Papel higienico, jabon y cuidado dental');
 
 -- Productos (precios en GTQ)
 INSERT INTO productos (codigo, nombre, descripcion, precio, stock, id_categoria, imagen_url) VALUES
-('LIB-001', 'Diccionario Larousse Escolar',        'Diccionario de espanol edicion escolar',        85.00,  30, 1, NULL),
-('LIB-002', 'Libro Ortografia Practica',           'Guia de ortografia con ejercicios',             45.00,  25, 1, NULL),
-('LIB-003', 'Atlas Geografico Universal',          'Atlas ilustrado a color',                       120.00, 12, 1, NULL),
-('CUA-001', 'Cuaderno Espiral 100 hojas',          'Cuaderno universitario cuadriculado',           18.50, 150, 2, NULL),
-('CUA-002', 'Cuaderno Empastado 200 hojas',        'Cuaderno empastado doble linea',                32.00,  80, 2, NULL),
-('CUA-003', 'Libreta de Apuntes Pequena',          'Libreta de bolsillo 80 hojas',                  8.00,  200, 2, NULL),
-('ESC-001', 'Lapicero BIC Azul',                   'Lapicero punta media tinta azul',               3.50, 500, 3, NULL),
-('ESC-002', 'Lapiz Mongol No.2 (caja 12)',         'Caja de 12 lapices de grafito',                 28.00,  60, 3, NULL),
-('ESC-003', 'Marcador Permanente Sharpie',         'Marcador permanente negro punta fina',          12.00,  90, 3, NULL),
-('ESC-004', 'Corrector Liquido',                   'Corrector liquido 20ml con brocha',             9.50,   4, 3, NULL),
-('PAP-001', 'Resma de Hojas Bond Carta',           'Resma 500 hojas papel bond 80g',                42.00,  40, 4, NULL),
-('PAP-002', 'Folder Manila Carta (paq 25)',        'Paquete de 25 folders manila',                  35.00,  35, 4, NULL),
-('PAP-003', 'Engrapadora Metalica',                'Engrapadora de escritorio estandar',            55.00,  20, 4, NULL),
-('PAP-004', 'Caja de Clips (100 unidades)',        'Clips metalicos No.1',                           6.00,   3, 4, NULL),
-('ART-001', 'Caja de Crayones (24 colores)',       'Crayones de cera 24 colores',                   22.00,  70, 5, NULL),
-('ART-002', 'Set de Temperas (6 colores)',         'Temperas lavables 6 colores',                   38.00,  45, 5, NULL),
-('ART-003', 'Pincel de Cerda No.6',                'Pincel para tempera y acuarela',                7.50,   55, 5, NULL),
-('MOC-001', 'Mochila Escolar Clasica',             'Mochila resistente con 3 compartimentos',       185.00, 18, 6, NULL),
-('MOC-002', 'Lonchera Termica',                    'Lonchera con aislamiento termico',              95.00,  22, 6, NULL),
-('TEC-001', 'Calculadora Cientifica Casio',        'Calculadora cientifica 240 funciones',          165.00, 15, 7, NULL),
-('TEC-002', 'Memoria USB 32GB',                    'Memoria USB 3.0 32GB',                          75.00,  40, 7, NULL),
-('TEC-003', 'Audifonos Escolares',                 'Audifonos con microfono para clases',           85.00,   2, 7, NULL);
+('BEB-001', 'Agua Pura 600 ml',                 'Botella de agua purificada',              5.00,  120, 1, NULL),
+('BEB-002', 'Gaseosa Cola 1.5 L',               'Bebida gaseosa sabor cola',               14.00, 60,  1, NULL),
+('BEB-003', 'Jugo de Naranja 1 L',              'Jugo de naranja pasteurizado',            16.50, 35,  1, NULL),
+('GRA-001', 'Frijol Negro 1 lb',                'Frijol negro seleccionado',               9.00,  90,  2, NULL),
+('GRA-002', 'Arroz Blanco 1 lb',                'Arroz blanco grano largo',                6.50,  110, 2, NULL),
+('GRA-003', 'Azucar Blanca 5 lb',               'Bolsa de azucar refinada',                24.00, 40,  2, NULL),
+('GRA-004', 'Harina de Maiz 1 kg',              'Harina de maiz nixtamalizado',            12.00, 3,   2, NULL),
+('ABA-001', 'Aceite Vegetal 1 L',               'Aceite vegetal para cocinar',             28.00, 30,  3, NULL),
+('ABA-002', 'Pasta Spaghetti 200 g',            'Pasta de trigo tipo spaghetti',           4.50,  80,  3, NULL),
+('ABA-003', 'Frijoles Volteados en Lata 400 g', 'Frijol negro volteado listo para servir', 11.00, 45,  3, NULL),
+('ABA-004', 'Sal Yodada 1 kg',                  'Sal de mesa yodada',                      4.00,  50,  3, NULL),
+('LAC-001', 'Leche Entera 1 L',                 'Leche entera ultrapasteurizada',          13.50, 24,  4, NULL),
+('LAC-002', 'Huevos (carton 30)',               'Carton de 30 huevos',                     42.00, 4,   4, NULL),
+('LAC-003', 'Queso Fresco 1 lb',                'Queso fresco artesanal',                  30.00, 12,  4, NULL),
+('SNA-001', 'Galletas de Vainilla (paq 6)',     'Paquete de 6 galletas de vainilla',       10.00, 70,  5, NULL),
+('SNA-002', 'Papalinas Clasicas 45 g',          'Papas fritas sabor natural',              5.50,  85,  5, NULL),
+('SNA-003', 'Chocolate en Barra 50 g',          'Barra de chocolate con leche',            8.00,  55,  5, NULL),
+('LIM-001', 'Detergente en Polvo 1 kg',         'Detergente para ropa',                    26.00, 28,  6, NULL),
+('LIM-002', 'Jabon para Trastos 500 g',         'Jabon en pasta para trastos',             12.50, 36,  6, NULL),
+('LIM-003', 'Cloro 1 L',                        'Blanqueador desinfectante',               9.50,  2,   6, NULL),
+('CUI-001', 'Papel Higienico (paq 4)',          'Paquete de 4 rollos doble hoja',          18.00, 48,  7, NULL),
+('CUI-002', 'Pasta Dental 100 ml',              'Crema dental con fluor',                  15.00, 33,  7, NULL);
 
 -- Clientes
 INSERT INTO clientes (nombre, nit, correo, telefono, direccion) VALUES
-('Consumidor Final',        'CF',        NULL,                       NULL,        NULL),
-('Maria Fernanda Lopez',    '1234567-8', 'mfernanda@example.com',    '5555-1234', 'Zona 1, Guatemala'),
-('Colegio San Jose',        '9876543-2', 'compras@colegiosj.edu.gt', '2222-9876', 'Zona 10, Guatemala'),
-('Carlos Ramirez',          '4567890-1', 'cramirez@example.com',     '4444-5678', 'Mixco, Guatemala');
+('Consumidor Final',     'CF',        NULL,                          NULL,        NULL),
+('Maria Fernanda Lopez', '1234567-8', 'mfernanda@example.com',       '5555-1234', 'Zona 1, Guatemala'),
+('Comedor Dona Rosa',    '9876543-2', 'compras@comedordonarosa.com', '2222-9876', 'Zona 10, Guatemala'),
+('Carlos Ramirez',       '4567890-1', 'cramirez@example.com',        '4444-5678', 'Mixco, Guatemala');
 
 -- Ventas de ejemplo (para que el dashboard y reportes muestren datos)
 INSERT INTO ventas (id_usuario, id_cliente, fecha, subtotal, iva, descuento, total, metodo_pago, estado) VALUES
-(2, 2, DATE_SUB(NOW(), INTERVAL 20 DAY), 44.00,  5.28,  0.00,  49.28,  'efectivo', 'completada'),
-(2, 1, DATE_SUB(NOW(), INTERVAL 12 DAY), 45.00,  5.40,  0.00,  50.40,  'tarjeta',  'completada'),
-(1, 3, DATE_SUB(NOW(), INTERVAL 5 DAY),  350.00, 39.60, 20.00, 369.60, 'QR',       'completada'),
-(2, 4, DATE_SUB(NOW(), INTERVAL 2 DAY),  28.00,  3.36,  0.00,  31.36,  'efectivo', 'completada'),
-(2, 1, DATE_SUB(NOW(), INTERVAL 1 DAY),  120.00, 14.40, 0.00,  134.40, 'tarjeta',  'completada'),
-(1, 2, NOW(),                            40.50,  4.86,  0.00,  45.36,  'efectivo', 'completada');
+(2, 2, DATE_SUB(NOW(), INTERVAL 20 DAY), 31.00,  3.72,  0.00,  34.72,  'efectivo', 'completada'),
+(2, 1, DATE_SUB(NOW(), INTERVAL 12 DAY), 28.00,  3.36,  0.00,  31.36,  'tarjeta',  'completada'),
+(1, 3, DATE_SUB(NOW(), INTERVAL 5 DAY),  216.00, 24.72, 10.00, 230.72, 'QR',       'completada'),
+(2, 4, DATE_SUB(NOW(), INTERVAL 2 DAY),  26.00,  3.12,  0.00,  29.12,  'efectivo', 'completada'),
+(2, 1, DATE_SUB(NOW(), INTERVAL 1 DAY),  57.00,  6.84,  0.00,  63.84,  'tarjeta',  'completada'),
+(1, 2, NOW(),                            33.50,  4.02,  0.00,  37.52,  'efectivo', 'completada');
 
 -- Detalle de las ventas de ejemplo (cada linea coincide con su cabecera)
 INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario, subtotal) VALUES
--- Venta 1 (cuadernos + lapiceros)
-(1, 4, 2, 18.50, 37.00),
-(1, 7, 2, 3.50,  7.00),
--- Venta 2 (libro de ortografia)
-(2, 2, 1, 45.00, 45.00),
--- Venta 3 (Colegio: mochila + calculadora, con descuento)
-(3, 18, 1, 185.00, 185.00),
-(3, 20, 1, 165.00, 165.00),
--- Venta 4 (caja de lapices)
-(4, 8, 1, 28.00, 28.00),
--- Venta 5 (atlas)
-(5, 3, 1, 120.00, 120.00),
--- Venta 6 (cuaderno + crayones)
-(6, 4,  1, 18.50, 18.50),
-(6, 15, 1, 22.00, 22.00);
+-- Venta 1 (frijol + arroz)
+(1, 4,  2, 9.00,  18.00),
+(1, 5,  2, 6.50,  13.00),
+-- Venta 2 (aceite)
+(2, 8,  1, 28.00, 28.00),
+-- Venta 3 (Comedor: huevos + azucar + aceite, con descuento)
+(3, 13, 2, 42.00, 84.00),
+(3, 6,  2, 24.00, 48.00),
+(3, 8,  3, 28.00, 84.00),
+-- Venta 4 (detergente)
+(4, 18, 1, 26.00, 26.00),
+-- Venta 5 (leche + queso)
+(5, 12, 2, 13.50, 27.00),
+(5, 14, 1, 30.00, 30.00),
+-- Venta 6 (gaseosas + papalinas)
+(6, 2,  2, 14.00, 28.00),
+(6, 16, 1, 5.50,  5.50);
 
 -- Pagos correspondientes (monto = total de la venta)
 INSERT INTO pagos (id_venta, monto, metodo, referencia_api, fecha) VALUES
-(1, 49.28,  'efectivo', NULL, DATE_SUB(NOW(), INTERVAL 20 DAY)),
-(2, 50.40,  'tarjeta',  NULL, DATE_SUB(NOW(), INTERVAL 12 DAY)),
-(3, 369.60, 'QR',       'QR-REF-000003', DATE_SUB(NOW(), INTERVAL 5 DAY)),
-(4, 31.36,  'efectivo', NULL, DATE_SUB(NOW(), INTERVAL 2 DAY)),
-(5, 134.40, 'tarjeta',  NULL, DATE_SUB(NOW(), INTERVAL 1 DAY)),
-(6, 45.36,  'efectivo', NULL, NOW());
+(1, 34.72,  'efectivo', NULL,            DATE_SUB(NOW(), INTERVAL 20 DAY)),
+(2, 31.36,  'tarjeta',  NULL,            DATE_SUB(NOW(), INTERVAL 12 DAY)),
+(3, 230.72, 'QR',       'QR-REF-000003', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(4, 29.12,  'efectivo', NULL,            DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(5, 63.84,  'tarjeta',  NULL,            DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(6, 37.52,  'efectivo', NULL,            NOW());

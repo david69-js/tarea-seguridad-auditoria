@@ -65,7 +65,7 @@ export default function Registro() {
                     <div className="input-group">
                         <span className="input-group-text"><i className="bi bi-envelope" aria-hidden="true"></i></span>
                         <input type="email" id="correo" name="correo" className="form-control" required
-                               autoComplete="email" placeholder="usuario@libreria.com"
+                               autoComplete="email" placeholder="usuario@tienda.com"
                                value={form.correo} onChange={cambiar} />
                     </div>
                 </div>

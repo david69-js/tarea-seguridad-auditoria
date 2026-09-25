@@ -1,5 +1,5 @@
 # =====================================================================
-#  VirtualHost del POS Libreria.
+#  VirtualHost del POS Tienda Bugambilias.
 #  __PORT__ lo reemplaza docker/entrypoint.sh con el valor de $PORT
 #  (Railway inyecta un puerto aleatorio; en local es 80).
 # =====================================================================

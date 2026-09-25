@@ -46,7 +46,7 @@ $config = [
     'db' => [
         'host'     => env('MYSQLHOST', env('DB_HOST', '127.0.0.1')),
         'port'     => env('MYSQLPORT', env('DB_PORT', '3306')),
-        'name'     => env('MYSQLDATABASE', env('DB_NAME', 'pos_libreria')),
+        'name'     => env('MYSQLDATABASE', env('DB_NAME', 'pos_tienda')),
         'user'     => env('MYSQLUSER', env('DB_USER', 'root')),
         'password' => env('MYSQLPASSWORD', env('DB_PASSWORD', 'root')),
     ],
@@ -54,7 +54,7 @@ $config = [
         'name'     => 'POS Tienda',
         'iva'      => 0.12,          // IVA 12%
         'moneda'   => 'GTQ',
-        'empresa'  => 'Tienda El Estudiante',
+        'empresa'  => 'Tienda Bugambilias',
         // API externa de codigos QR (funcionalidad visible en cada factura)
         'qr_api'   => 'https://api.qrserver.com/v1/create-qr-code/',
     ],

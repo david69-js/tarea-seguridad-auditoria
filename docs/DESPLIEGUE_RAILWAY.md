@@ -43,13 +43,13 @@ asegurarse de que el servicio web pueda verlas:
 
 ## Paso 4 — Cargar el esquema y los datos
 
-La base de datos de Railway arranca vacía. Cargar `database/pos_libreria.sql`
+La base de datos de Railway arranca vacía. Cargar `database/pos_tienda.sql`
 de una de estas formas:
 
 **Opción A — Cliente MySQL local**
 ```bash
 mysql -h <MYSQLHOST> -P <MYSQLPORT> -u <MYSQLUSER> -p<MYSQLPASSWORD> \
-      <MYSQLDATABASE> < database/pos_libreria.sql
+      <MYSQLDATABASE> < database/pos_tienda.sql
 ```
 (Los valores están en la pestaña **Variables** o **Connect** del servicio MySQL.)
 
@@ -57,7 +57,7 @@ mysql -h <MYSQLHOST> -P <MYSQLPORT> -u <MYSQLUSER> -p<MYSQLPASSWORD> \
 ```bash
 railway login
 railway link          # seleccionar el proyecto
-railway connect MySQL # abre una consola mysql; luego: source database/pos_libreria.sql
+railway connect MySQL # abre una consola mysql; luego: source database/pos_tienda.sql
 ```
 
 **Opción C — Interfaz web**
@@ -67,7 +67,7 @@ Usar la pestaña **Data** del servicio MySQL en Railway y pegar el contenido del
 
 1. Servicio **web** → **Settings** → **Networking** → **Generate Domain**.
 2. Railway entrega una URL como `https://tu-proyecto.up.railway.app`.
-3. Abrir esa URL e iniciar sesión con `admin@libreria.com` / `admin123`.
+3. Abrir esa URL e iniciar sesión con `admin@tienda.com` / `admin123`.
 
 ---
 

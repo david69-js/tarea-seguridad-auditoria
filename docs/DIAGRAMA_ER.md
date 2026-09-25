@@ -1,6 +1,6 @@
 # Diagrama Entidad–Relación (ER)
 
-Base de datos `pos_libreria` — 7 tablas relacionadas y normalizadas.
+Base de datos `pos_tienda` — 7 tablas relacionadas y normalizadas.
 
 > El diagrama está en formato **Mermaid**. Se ve renderizado automáticamente
 > en GitHub. Para exportarlo como imagen para el PDF, puedes pegar el código en
