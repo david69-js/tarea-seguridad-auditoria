@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../lib/api';
-import { IVA } from '../lib/config';
 import { money } from '../lib/formato';
 import { useDebounce } from '../lib/useDebounce';
 import { useToast } from '../lib/toast';
 import FilaVacia from '../components/FilaVacia';
 
-/* Punto de Venta (POS): búsqueda, carrito, IVA 12%, descuento, cobro. */
+/* Punto de Venta (POS): búsqueda, carrito, descuento y cobro.
+   Los precios son finales (sin IVA), el cobro es siempre en efectivo y no
+   se emite factura. */
 
 export default function Pos() {
     const toast = useToast();
@@ -19,7 +20,6 @@ export default function Pos() {
 
     const [carrito, setCarrito] = useState([]);   // { id, nombre, precio, cantidad, stock }
     const [idCliente, setIdCliente] = useState('');
-    const [metodo, setMetodo] = useState('efectivo');
     const [descuento, setDescuento] = useState('0');
     const [cobrando, setCobrando] = useState(false);
     const [aviso, setAviso] = useState('');
@@ -36,7 +36,10 @@ export default function Pos() {
         api('/api/clientes').then((res) => {
             const lista = res.ok ? res.data : [];
             setClientes(lista);
-            if (lista.length) setIdCliente(String(lista[0].id));
+            // Por defecto, el cliente genérico para ventas rápidas (la lista
+            // viene en orden alfabético, así que no suele ser el primero).
+            const general = lista.find((c) => c.nombre === 'Cliente General') ?? lista[0];
+            if (general) setIdCliente(String(general.id));
         });
     }, []);
 
@@ -65,8 +68,7 @@ export default function Pos() {
     /* ---------------- Totales ---------------- */
     const subtotal = carrito.reduce((s, i) => s + i.precio * i.cantidad, 0);
     const desc = Math.min(parseFloat(descuento) || 0, subtotal);
-    const base = subtotal - desc;
-    const iva = base * IVA;
+    const total = subtotal - desc;
     const unidades = carrito.reduce((s, i) => s + i.cantidad, 0);
 
     // El descuento no puede superar el subtotal (el servidor también lo rechaza).
@@ -82,7 +84,6 @@ export default function Pos() {
             method: 'POST',
             body: {
                 id_cliente: idCliente || null,
-                metodo_pago: metodo,
                 descuento: desc,
                 items: carrito.map((i) => ({ id_producto: i.id, cantidad: i.cantidad })),
             },
@@ -92,9 +93,7 @@ export default function Pos() {
         if (res.ok) {
             vaciar();
             cargarProductos();
-            // Abre la factura imprimible (incluye el código QR de la API externa)
-            window.open(`/ventas/${res.data.id}`, '_blank');
-            toast('Venta #' + res.data.id + ' registrada correctamente.', true);
+            toast(`Venta #${res.data.id} registrada: ${money(res.data.total)} en efectivo.`, true);
             buscador.current?.focus();
         } else {
             toast(res.mensaje, false);
@@ -190,23 +189,15 @@ export default function Pos() {
                     </div>
 
                     <div className="card-footer bg-white">
-                        <div className="row g-2 mb-3">
-                            <div className="col-7">
-                                <label className="visually-hidden" htmlFor="posCliente">Cliente</label>
-                                <select id="posCliente" className="form-select form-select-sm"
-                                        value={idCliente} onChange={(e) => setIdCliente(e.target.value)}>
-                                    {clientes.map((c) => <option key={c.id} value={c.id}>{c.nombre} ({c.nit})</option>)}
-                                </select>
-                            </div>
-                            <div className="col-5">
-                                <label className="visually-hidden" htmlFor="posMetodo">Método de pago</label>
-                                <select id="posMetodo" className="form-select form-select-sm"
-                                        value={metodo} onChange={(e) => setMetodo(e.target.value)}>
-                                    <option value="efectivo">Efectivo</option>
-                                    <option value="tarjeta">Tarjeta</option>
-                                    <option value="QR">Pago QR</option>
-                                </select>
-                            </div>
+                        <div className="d-flex gap-2 align-items-center mb-3">
+                            <label className="visually-hidden" htmlFor="posCliente">Cliente</label>
+                            <select id="posCliente" className="form-select form-select-sm"
+                                    value={idCliente} onChange={(e) => setIdCliente(e.target.value)}>
+                                {clientes.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                            </select>
+                            <span className="pill pill-success text-nowrap">
+                                <i className="bi bi-cash" aria-hidden="true"></i> Efectivo
+                            </span>
                         </div>
 
                         <div className="totales">
@@ -219,9 +210,8 @@ export default function Pos() {
                                            value={descuento} onChange={(e) => setDescuento(e.target.value)} />
                                 </div>
                             </div>
-                            <div className="fila"><span>IVA (12%)</span><span>{money(iva)}</span></div>
                             <hr className="my-2" />
-                            <div className="fila total-grande"><span>TOTAL</span><span>{money(base + iva)}</span></div>
+                            <div className="fila total-grande"><span>TOTAL</span><span>{money(total)}</span></div>
                         </div>
 
                         <button className="btn btn-success w-100 btn-cobrar mt-3" type="button"

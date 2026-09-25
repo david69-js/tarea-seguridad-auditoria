@@ -105,12 +105,12 @@ export default function Dashboard() {
             <div className="row g-3 mb-3">
                 <div className="col-6 col-xl-3">
                     <Kpi tono="primary" icono="bi-cash-coin" valor={k ? money(k.ventas_hoy) : '—'}>
-                        Ventas de hoy {k && <span className="text-muted">· {k.num_ventas_hoy} facturas</span>}
+                        Ventas de hoy {k && <span className="text-muted">· {k.num_ventas_hoy} ventas</span>}
                     </Kpi>
                 </div>
                 <div className="col-6 col-xl-3">
                     <Kpi tono="success" icono="bi-calendar-check" valor={k ? money(k.ventas_mes) : '—'}>
-                        Ventas del mes {k && <span className="text-muted">· {k.num_ventas_mes} facturas</span>}
+                        Ventas del mes {k && <span className="text-muted">· {k.num_ventas_mes} ventas</span>}
                     </Kpi>
                 </div>
                 <div className="col-6 col-xl-3">

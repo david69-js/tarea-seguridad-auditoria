@@ -5,7 +5,8 @@
 --
 --  Script completo: ESTRUCTURA + DATOS DE PRUEBA
 --  Motor: MySQL 8 / MariaDB 10.x
---  Moneda: Quetzales (GTQ)  |  IVA: 12%
+--  Moneda: Quetzales (GTQ)  |  Precios finales (sin IVA)
+--  Ventas al contado: solo efectivo y sin emision de facturas
 --
 --  Usuarios de prueba (contrasena en texto plano solo para pruebas):
 --    - admin@tienda.com   / admin123    (rol: admin)
@@ -73,14 +74,13 @@ CREATE TABLE productos (
 CREATE TABLE clientes (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     nombre     VARCHAR(150) NOT NULL,
-    nit        VARCHAR(20)  DEFAULT 'CF',
     correo     VARCHAR(150) DEFAULT NULL,
     telefono   VARCHAR(20)  DEFAULT NULL,
     direccion  VARCHAR(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
--- Tabla: ventas  (cabecera de la factura)
+-- Tabla: ventas  (cabecera de la venta)
 -- ---------------------------------------------------------------------
 CREATE TABLE ventas (
     id           INT AUTO_INCREMENT PRIMARY KEY,
@@ -88,10 +88,8 @@ CREATE TABLE ventas (
     id_cliente   INT           DEFAULT NULL,
     fecha        TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     subtotal     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    iva          DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     descuento    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     total        DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    metodo_pago  ENUM('efectivo','tarjeta','QR') NOT NULL DEFAULT 'efectivo',
     estado       ENUM('completada','anulada') NOT NULL DEFAULT 'completada',
     CONSTRAINT fk_venta_usuario
         FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
@@ -103,7 +101,7 @@ CREATE TABLE ventas (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
--- Tabla: detalle_ventas  (lineas de cada factura)
+-- Tabla: detalle_ventas  (lineas de cada venta)
 -- ---------------------------------------------------------------------
 CREATE TABLE detalle_ventas (
     id               INT AUTO_INCREMENT PRIMARY KEY,
@@ -121,14 +119,12 @@ CREATE TABLE detalle_ventas (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
--- Tabla: pagos  (registro del pago, referencia a API externa cuando aplica)
+-- Tabla: pagos  (registro del pago en efectivo de cada venta)
 -- ---------------------------------------------------------------------
 CREATE TABLE pagos (
     id             INT AUTO_INCREMENT PRIMARY KEY,
     id_venta       INT           NOT NULL,
     monto          DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    metodo         ENUM('efectivo','tarjeta','QR') NOT NULL DEFAULT 'efectivo',
-    referencia_api VARCHAR(255)  DEFAULT NULL,
     fecha          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_pago_venta
         FOREIGN KEY (id_venta) REFERENCES ventas(id)
@@ -181,20 +177,20 @@ INSERT INTO productos (codigo, nombre, descripcion, precio, stock, id_categoria,
 ('CUI-002', 'Pasta Dental 100 ml',              'Crema dental con fluor',                  15.00, 33,  7, NULL);
 
 -- Clientes
-INSERT INTO clientes (nombre, nit, correo, telefono, direccion) VALUES
-('Consumidor Final',     'CF',        NULL,                          NULL,        NULL),
-('Maria Fernanda Lopez', '1234567-8', 'mfernanda@example.com',       '5555-1234', 'Zona 1, Guatemala'),
-('Comedor Dona Rosa',    '9876543-2', 'compras@comedordonarosa.com', '2222-9876', 'Zona 10, Guatemala'),
-('Carlos Ramirez',       '4567890-1', 'cramirez@example.com',        '4444-5678', 'Mixco, Guatemala');
+INSERT INTO clientes (nombre, correo, telefono, direccion) VALUES
+('Cliente General',      NULL,                          NULL,        NULL),
+('Maria Fernanda Lopez', 'mfernanda@example.com',       '5555-1234', 'Zona 1, Guatemala'),
+('Comedor Dona Rosa',    'compras@comedordonarosa.com', '2222-9876', 'Zona 10, Guatemala'),
+('Carlos Ramirez',       'cramirez@example.com',        '4444-5678', 'Mixco, Guatemala');
 
 -- Ventas de ejemplo (para que el dashboard y reportes muestren datos)
-INSERT INTO ventas (id_usuario, id_cliente, fecha, subtotal, iva, descuento, total, metodo_pago, estado) VALUES
-(2, 2, DATE_SUB(NOW(), INTERVAL 20 DAY), 31.00,  3.72,  0.00,  34.72,  'efectivo', 'completada'),
-(2, 1, DATE_SUB(NOW(), INTERVAL 12 DAY), 28.00,  3.36,  0.00,  31.36,  'tarjeta',  'completada'),
-(1, 3, DATE_SUB(NOW(), INTERVAL 5 DAY),  216.00, 24.72, 10.00, 230.72, 'QR',       'completada'),
-(2, 4, DATE_SUB(NOW(), INTERVAL 2 DAY),  26.00,  3.12,  0.00,  29.12,  'efectivo', 'completada'),
-(2, 1, DATE_SUB(NOW(), INTERVAL 1 DAY),  57.00,  6.84,  0.00,  63.84,  'tarjeta',  'completada'),
-(1, 2, NOW(),                            33.50,  4.02,  0.00,  37.52,  'efectivo', 'completada');
+INSERT INTO ventas (id_usuario, id_cliente, fecha, subtotal, descuento, total, estado) VALUES
+(2, 2, DATE_SUB(NOW(), INTERVAL 20 DAY), 31.00,  0.00,  31.00,  'completada'),
+(2, 1, DATE_SUB(NOW(), INTERVAL 12 DAY), 28.00,  0.00,  28.00,  'completada'),
+(1, 3, DATE_SUB(NOW(), INTERVAL 5 DAY),  216.00, 10.00, 206.00, 'completada'),
+(2, 4, DATE_SUB(NOW(), INTERVAL 2 DAY),  26.00,  0.00,  26.00,  'completada'),
+(2, 1, DATE_SUB(NOW(), INTERVAL 1 DAY),  57.00,  0.00,  57.00,  'completada'),
+(1, 2, NOW(),                            33.50,  0.00,  33.50,  'completada');
 
 -- Detalle de las ventas de ejemplo (cada linea coincide con su cabecera)
 INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario, subtotal) VALUES
@@ -216,11 +212,11 @@ INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario, su
 (6, 2,  2, 14.00, 28.00),
 (6, 16, 1, 5.50,  5.50);
 
--- Pagos correspondientes (monto = total de la venta)
-INSERT INTO pagos (id_venta, monto, metodo, referencia_api, fecha) VALUES
-(1, 34.72,  'efectivo', NULL,            DATE_SUB(NOW(), INTERVAL 20 DAY)),
-(2, 31.36,  'tarjeta',  NULL,            DATE_SUB(NOW(), INTERVAL 12 DAY)),
-(3, 230.72, 'QR',       'QR-REF-000003', DATE_SUB(NOW(), INTERVAL 5 DAY)),
-(4, 29.12,  'efectivo', NULL,            DATE_SUB(NOW(), INTERVAL 2 DAY)),
-(5, 63.84,  'tarjeta',  NULL,            DATE_SUB(NOW(), INTERVAL 1 DAY)),
-(6, 37.52,  'efectivo', NULL,            NOW());
+-- Pagos en efectivo (monto = total de la venta)
+INSERT INTO pagos (id_venta, monto, fecha) VALUES
+(1, 31.00,  DATE_SUB(NOW(), INTERVAL 20 DAY)),
+(2, 28.00,  DATE_SUB(NOW(), INTERVAL 12 DAY)),
+(3, 206.00, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(4, 26.00,  DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(5, 57.00,  DATE_SUB(NOW(), INTERVAL 1 DAY)),
+(6, 33.50,  NOW());

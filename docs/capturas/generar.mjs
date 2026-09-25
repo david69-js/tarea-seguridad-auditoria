@@ -49,10 +49,11 @@ for (const [ruta, nombre] of [
   await captura(nombre);
 }
 
-// Factura con código QR
-await page.setViewport({ width: 700, height: 1150, deviceScaleFactor: 2 });
-await page.goto(BASE + '/ventas/1', { waitUntil: 'networkidle2' });
-await captura('08-factura-qr');
+// Detalle de una venta (la tienda no emite facturas)
+await page.goto(BASE + '/ventas', { waitUntil: 'networkidle2' });
+await page.click('tbody tr .btn-outline-primary');
+await page.waitForSelector('.modal.show');
+await captura('08-detalle-venta');
 
 // Vista móvil (diseño responsivo)
 await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true });

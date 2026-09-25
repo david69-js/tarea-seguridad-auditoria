@@ -4,7 +4,7 @@ Proyecto del curso **Seguridad y Auditoría de Sistemas (PHP y MySQL)**
 Universidad Mariano Gálvez de Guatemala · Ciclo 2026
 
 Sistema de Punto de Venta web **full-stack** para una tienda familiar (Tienda Bugambilias):
-inventario, ventas con carrito e IVA, factura con **código QR**, dashboard con
+inventario, ventas al contado en efectivo con carrito y descuento, dashboard con
 gráficas, autenticación con roles y una **API REST propia** documentada.
 
 ---
@@ -18,7 +18,7 @@ gráficas, autenticación con roles y una **API REST propia** documentada.
 | Base de datos | **MySQL 8 / MariaDB** |
 | Autenticación | Sesiones PHP + **bcrypt** (`password_hash`), roles admin/cajero |
 | API REST | JSON + métodos HTTP + códigos de estado |
-| APIs externas | **QR Code** (api.qrserver.com) · **OpenWeatherMap** · **Chart.js** (react-chartjs-2) · **Google Fonts** |
+| APIs externas | **OpenWeatherMap** · **Chart.js** (react-chartjs-2) · **Google Fonts** |
 | Contenedores | Docker + Docker Compose |
 | Hosting | Railway.app (PHP + MySQL) |
 
@@ -96,7 +96,7 @@ frontend en una etapa con Node y copia solo el resultado a la imagen PHP.
 │   ├── src/
 │   │   ├── main.jsx         # Punto de entrada (router + proveedores)
 │   │   ├── App.jsx          # Rutas y protección por sesión / rol
-│   │   ├── pages/           # Pantallas: Dashboard, Pos, Productos, Factura...
+│   │   ├── pages/           # Pantallas: Dashboard, Pos, Productos, Ventas...
 │   │   ├── components/      # Layout, Modal, Kpi, CampoPassword...
 │   │   ├── lib/             # Cliente de la API, sesión, toasts, formato
 │   │   └── styles.css       # Estilos propios sobre Bootstrap
@@ -197,7 +197,7 @@ Los endpoints marcados con 🔒 requieren sesión; los marcados con 👑 requier
 | Método | Endpoint | Descripción | Códigos |
 |--------|----------|-------------|---------|
 | `GET`  | `/api/ventas` 🔒 | Lista las últimas ventas | `200` |
-| `GET`  | `/api/ventas/{id}` 🔒 | Venta completa con detalle (usada por la factura) | `200`, `404` |
+| `GET`  | `/api/ventas/{id}` 🔒 | Venta completa con los productos vendidos | `200`, `404` |
 | `POST` | `/api/ventas` 🔒 | Registra una venta (transacción atómica) | `201`, `422` |
 | `POST` | `/api/ventas/{id}/anular` 👑 | Anula la venta y devuelve el stock | `200`, `404`, `409` |
 
@@ -249,7 +249,6 @@ curl -b cookies.txt -X POST http://localhost:8091/api/ventas \
   -H "Content-Type: application/json" \
   -d '{
         "id_cliente": 2,
-        "metodo_pago": "QR",
         "descuento": 5,
         "items": [
           { "id_producto": 4, "cantidad": 2 },
@@ -263,9 +262,13 @@ Respuesta (`201 Created`):
 {
   "ok": true,
   "mensaje": "Venta registrada correctamente.",
-  "data": { "id": 7, "subtotal": 40.5, "iva": 4.26, "descuento": 5, "total": 39.76, "...": "..." }
+  "data": { "id": 7, "subtotal": 30, "descuento": 5, "total": 25, "...": "..." }
 }
 ```
+
+Reglas de la tienda que aplica el servidor: los precios del catálogo son
+**finales (sin IVA)**, todas las ventas se cobran **en efectivo** y **no se
+emiten facturas**, así que `total = subtotal − descuento`.
 
 ---
 

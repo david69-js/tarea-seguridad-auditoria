@@ -72,7 +72,7 @@ export default function Reportes() {
                 {r && <>
                     <div className="col-6 col-md-3"><Kpi tono="primary" icono="bi-receipt" valor={r.num}>Ventas</Kpi></div>
                     <div className="col-6 col-md-3"><Kpi tono="success" icono="bi-cash" valor={money(r.total)}>Total vendido</Kpi></div>
-                    <div className="col-6 col-md-3"><Kpi tono="info" icono="bi-percent" valor={money(r.iva)}>IVA recaudado</Kpi></div>
+                    <div className="col-6 col-md-3"><Kpi tono="info" icono="bi-calculator" valor={money(r.num ? r.total / r.num : 0)}>Promedio por venta</Kpi></div>
                     <div className="col-6 col-md-3"><Kpi tono="warning" icono="bi-tag" valor={money(r.descuento)}>Descuentos</Kpi></div>
                 </>}
             </div>
@@ -86,24 +86,22 @@ export default function Reportes() {
                                 <caption className="visually-hidden">Ventas registradas en el rango de fechas seleccionado</caption>
                                 <thead>
                                     <tr>
-                                        <th scope="col">Factura</th>
+                                        <th scope="col">Venta</th>
                                         <th scope="col">Fecha</th>
                                         <th scope="col">Cliente</th>
-                                        <th scope="col">Método</th>
                                         <th scope="col" className="text-end">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {!reporte && <FilaVacia columnas={5}>Generando reporte…</FilaVacia>}
+                                    {!reporte && <FilaVacia columnas={4}>Generando reporte…</FilaVacia>}
                                     {reporte?.ventas.length === 0 && (
-                                        <FilaVacia columnas={5} icono="bi-calendar-x">Sin ventas en el período seleccionado.</FilaVacia>
+                                        <FilaVacia columnas={4} icono="bi-calendar-x">Sin ventas en el período seleccionado.</FilaVacia>
                                     )}
                                     {reporte?.ventas.map((v) => (
                                         <tr key={v.id}>
                                             <td className="fw-semibold">#{folio(v.id)}</td>
                                             <td>{fechaCorta(v.fecha)}</td>
-                                            <td>{v.cliente || 'Consumidor Final'}</td>
-                                            <td className="text-capitalize">{v.metodo_pago}</td>
+                                            <td>{v.cliente || 'Cliente General'}</td>
                                             <td className="text-end">{money(v.total)}</td>
                                         </tr>
                                     ))}

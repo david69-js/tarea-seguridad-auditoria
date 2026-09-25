@@ -10,7 +10,7 @@ export function fechaCorta(valor) {
     return d.toLocaleString('es-GT', { dateStyle: 'medium', timeStyle: 'short' });
 }
 
-/** Número de factura con ceros a la izquierda: 7 -> "000007". */
+/** Número de venta con ceros a la izquierda: 7 -> "000007". */
 export function folio(id) {
     return String(id).padStart(6, '0');
 }

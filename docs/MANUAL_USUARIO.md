@@ -53,12 +53,13 @@ Al ingresar verás:
 3. Hacer **clic en el producto** para agregarlo al carrito (a la derecha).
 4. Ajustar la **cantidad** con los botones `−` y `+`. El sistema no deja vender
    más de lo que hay en stock.
-5. (Opcional) Seleccionar el **cliente** y el **método de pago** (efectivo, tarjeta o QR).
+5. (Opcional) Seleccionar el **cliente**.
 6. (Opcional) Escribir un **descuento** en Quetzales.
-7. Revisar **Subtotal**, **IVA (12%)** y **TOTAL**, que se calculan automáticamente.
-8. Presionar **Cobrar**.
-9. Se abre la **factura imprimible** con un **código QR**. Usar **Imprimir / PDF**
-   para imprimirla o guardarla como PDF.
+7. Revisar **Subtotal** y **TOTAL**, que se calculan automáticamente. Los precios
+   ya son finales: no se suma IVA.
+8. Cobrar al cliente **en efectivo** (es la única forma de pago) y presionar **Cobrar**.
+9. Aparece un aviso con el número de venta y el monto cobrado. La tienda **no
+   emite facturas**; el detalle queda guardado en **Ventas**.
 
 ---
 
@@ -79,15 +80,16 @@ Al ingresar verás:
 ## 5. Clientes
 
 - Ver, buscar, crear y editar clientes.
-- El cliente **"Consumidor Final" (NIT: CF)** viene por defecto para ventas rápidas.
+- El cliente **"Cliente General"** viene por defecto para ventas rápidas.
+- **Buscar:** por nombre o teléfono.
 - Eliminar clientes es exclusivo del Administrador (no se puede eliminar un cliente con ventas).
 
 ---
 
 ## 6. Ventas (historial)
 
-- Lista de todas las ventas con fecha, cliente, cajero, método y total.
-- Botón de **factura** para volver a ver/imprimir cualquier venta.
+- Lista de todas las ventas con fecha, cliente, cajero y total (todas en efectivo).
+- Botón del **ojo** para ver el detalle de una venta: productos, cantidades, descuento y total.
 - El **Administrador** puede **anular** una venta; al anularla se devuelve el stock.
 
 ---
@@ -95,7 +97,7 @@ Al ingresar verás:
 ## 7. Reportes
 
 - Elegir un rango de fechas **Desde / Hasta** y presionar **Generar**.
-- Muestra: número de ventas, total vendido, IVA recaudado y descuentos.
+- Muestra: número de ventas, total vendido, promedio por venta y descuentos.
 - Tabla de ventas del período y ranking de **productos más vendidos**.
 - Botón **Imprimir / PDF** para exportar el reporte.
 
@@ -126,9 +128,6 @@ Llegaste al stock disponible del producto. Reabastece el inventario para vender 
 
 **Un cajero no ve los botones de crear/editar/eliminar.**
 Es correcto: esas acciones son solo para el Administrador.
-
-**La factura no muestra el código QR.**
-El QR se genera con un servicio externo (api.qrserver.com); requiere conexión a Internet.
 
 **El dashboard dice "Clima no disponible".**
 Falta configurar la clave gratuita de OpenWeatherMap (`OPENWEATHER_API_KEY`).

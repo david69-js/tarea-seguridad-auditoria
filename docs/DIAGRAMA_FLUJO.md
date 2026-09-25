@@ -9,79 +9,72 @@ GitHub y en VS Code con la extensión de Mermaid).
 
 ## 1. Arquitectura general
 
-Aplicación **PHP puro** (sin framework) con patrón *Front Controller*. Un único
-punto de entrada (`public/index.php`) despacha dos tipos de rutas:
+La aplicación tiene dos partes:
 
-- **Rutas web** → devuelven páginas HTML (Bootstrap).
-- **Rutas `/api`** → API REST propia que devuelve JSON.
+- **Frontend:** SPA en **React** (compilada con Vite). Apache sirve los archivos
+  estáticos de `public/app/` y React Router decide qué pantalla mostrar.
+- **Backend:** **API REST en PHP puro** (sin framework) con patrón *Front
+  Controller*. Todas las peticiones a `/api/*` entran por `public/index.php` y
+  siempre responden JSON. El backend no genera HTML.
 
-El navegador consume la API con `fetch` (ver `public/assets/js/app.js`).
+El navegador consume la API con `fetch` (ver `frontend/src/lib/api.js`).
 
 ```mermaid
 flowchart LR
     Usuario([👤 Usuario<br/>navegador])
 
     subgraph Cliente["Frontend (navegador)"]
-        HTML[Páginas HTML<br/>Bootstrap]
-        JS["app.js<br/>fetch() a la API REST"]
+        SPA["SPA React<br/>React Router + Bootstrap"]
+        JS["lib/api.js<br/>fetch() a la API REST"]
     end
 
-    subgraph Servidor["Servidor PHP (Apache/Docker)"]
-        HT[".htaccess<br/>reescribe todo →"]
-        FC["public/index.php<br/>Front Controller / Router"]
-
-        subgraph Ctrls["Controladores"]
-            WEB["web.php<br/>(páginas)"]
-            API["auth · productos · categorias<br/>clientes · ventas · reportes<br/>(API REST → JSON)"]
-        end
-
-        HELP["helpers.php<br/>sesión, roles, view(), JSON"]
+    subgraph Servidor["Servidor (Apache/Docker)"]
+        HT[".htaccess"]
+        EST["public/app/<br/>index.html + JS/CSS"]
+        FC["public/index.php<br/>Router de la API"]
+        API["auth · productos · categorias<br/>clientes · ventas · reportes<br/>usuarios · clima"]
+        HELP["helpers.php<br/>JSON, sesión, roles"]
         DBP["db.php (PDO singleton)"]
     end
 
     DB[("🗄️ MySQL<br/>pos_tienda")]
-    QR["🌐 API externa QR<br/>api.qrserver.com"]
+    OWM["🌐 OpenWeatherMap<br/>(clima del dashboard)"]
 
-    Usuario --> HTML
-    HTML --> JS
-    JS -->|"HTTP + cookies de sesión"| HT
-    Usuario -->|"navegación de páginas"| HT
-    HT --> FC
-    FC --> WEB
+    Usuario --> SPA
+    SPA --> JS
+    Usuario -->|"/login, /pos, ..."| HT
+    HT -->|"rutas de pantalla"| EST
+    JS -->|"/api/* + cookie de sesión"| HT
+    HT -->|"/api/*"| FC
     FC --> API
-    WEB --> HELP
     API --> HELP
-    WEB --> DBP
     API --> DBP
     DBP --> DB
-    HTML -.->|"<img> del QR"| QR
+    API -.->|"clima.php (desde el servidor)"| OWM
 ```
 
 ---
 
-## 2. Ciclo de vida de una petición (Router)
+## 2. Ciclo de vida de una petición a la API (Router)
 
-Todo pasa por `public/index.php`, que calcula la ruta y el método, aplica el
-*method override* (para PUT/DELETE desde formularios) y hace *match* contra la
-tabla de rutas.
+`public/.htaccess` envía las rutas `/api/*` a `public/index.php`, que calcula la
+ruta y el método, aplica el *method override* (para PUT/DELETE con archivos) y
+hace *match* contra la tabla de rutas. Cualquier otra ruta se responde con el
+`index.html` de React.
 
 ```mermaid
 flowchart TD
-    A([Llega petición]) --> B[".htaccess → public/index.php"]
-    B --> C["Carga db.php, helpers.php<br/>y todos los controladores"]
+    A([Llega petición]) --> B{"¿La ruta empieza<br/>con /api?"}
+    B -->|No| S["Archivo estático o<br/>public/app/index.html (React)"]
+    B -->|Sí| C["public/index.php<br/>carga db.php, helpers.php y controladores"]
     C --> D["Calcula ruta (path) y método HTTP"]
     D --> E{"¿POST con<br/>_method PUT/PATCH/DELETE?"}
     E -->|Sí| F["Sobrescribe el método"]
     E -->|No| G
     F --> G["dispatch(method, path)"]
     G --> H{"¿Coincide<br/>alguna ruta?"}
-
-    H -->|"Ruta web"| I["Controlador web.php"]
-    H -->|"Ruta /api"| J["Controlador de API"]
-    H -->|"No coincide (/api)"| K["json_error 404 / 405"]
-    H -->|"No coincide (web)"| L["Vista errors/404"]
-
-    I --> M["view() renderiza HTML<br/>dentro de layout/main"]
+    H -->|Sí| J["Controlador de la API"]
+    H -->|No| K["json_error 404 / 405"]
     J --> N["json_ok / json_error<br/>respuesta JSON"]
 ```
 
@@ -89,35 +82,31 @@ flowchart TD
 
 ## 3. Autenticación y control de roles
 
-Hay dos vías de login (formulario web y API), ambas verifican la contraseña con
-**bcrypt** (`password_verify`) contra la tabla `usuarios` y guardan al usuario en
-`$_SESSION`. Los roles son **`admin`** y **`cajero`**.
+El login se hace contra la API: verifica la contraseña con **bcrypt**
+(`password_verify`) contra la tabla `usuarios` y guarda al usuario en
+`$_SESSION`. Los roles son **`admin`** y **`cajero`**. React oculta lo que el rol
+no permite, pero quien decide es siempre el servidor.
 
 ```mermaid
 flowchart TD
-    A([Usuario abre la app]) --> B{"¿Sesión activa?<br/>is_logged_in()"}
-    B -->|No| C["/login — formulario"]
-    C --> D["POST /login<br/>correo + password"]
-    D --> E["SELECT usuarios WHERE correo, activo=1"]
-    E --> F{"¿Existe y<br/>password_verify() OK?"}
-    F -->|No| G["Redirige a /login?error=1"]
-    G --> C
-    F -->|Sí| H["session_regenerate_id()<br/>guarda \$_SESSION['user'] (id, rol...)"]
-    H --> I["Redirige a /dashboard"]
+    A([Usuario abre la app]) --> B["React pide GET /api/auth/me"]
+    B --> C{"¿Sesión activa?"}
+    C -->|No 401| D["Pantalla /login"]
+    D --> E["POST /api/auth/login<br/>correo + password"]
+    E --> F["SELECT usuarios WHERE correo, activo=1"]
+    F --> G{"¿Existe y<br/>password_verify() OK?"}
+    G -->|No| H["401 → aviso 'Correo o contraseña incorrectos'"]
+    H --> D
+    G -->|Sí| I["session_regenerate_id()<br/>guarda $_SESSION['user'] (id, rol...)"]
+    I --> J["React muestra el dashboard"]
+    C -->|Sí 200| J
 
-    B -->|Sí| I
-
-    I --> J{"Acción solicitada"}
-    J -->|"Página protegida"| K["require_login()"]
-    J -->|"Endpoint API"| L["require_api_login()"]
-    J -->|"Solo admin<br/>(usuarios, anular venta)"| M["require_api_admin()<br/>/ is_admin()"]
-
-    K --> N{¿Autenticado?}
-    N -->|No| C
-    N -->|Sí| O["Sirve la página / dato"]
+    J --> K{"Petición a la API"}
+    K -->|"Endpoint con sesión"| L["require_api_login()"]
+    K -->|"Solo admin<br/>(usuarios, anular venta, catálogo)"| M["require_api_admin()"]
     L --> P{¿Autenticado?}
-    P -->|No| Q["401 JSON → app.js redirige a /login"]
-    P -->|Sí| O
+    P -->|No| Q["401 → React vuelve a /login"]
+    P -->|Sí| O["Responde el dato (JSON)"]
     M --> R{¿Es admin?}
     R -->|No| S["403 — Acceso denegado"]
     R -->|Sí| O
@@ -130,12 +119,15 @@ flowchart TD
 El corazón del sistema. El cajero arma el carrito en `/pos`, el navegador envía
 `POST /api/ventas` y el servidor procesa **todo en una transacción atómica**:
 valida stock (con `FOR UPDATE`), calcula importes, guarda cabecera + detalle,
-descuenta stock, registra el pago y hace `commit`. Luego se puede imprimir la
-**factura con código QR**.
+descuenta stock, registra el pago y hace `commit`.
+
+Reglas de la tienda: los precios son **finales (sin IVA)**, el cobro es
+**siempre en efectivo** y **no se emiten facturas**; el detalle de cada venta se
+consulta en pantalla desde el historial.
 
 ```mermaid
 flowchart TD
-    A([Cajero en /pos]) --> B["Agrega productos al carrito<br/>elige cliente, método de pago, descuento"]
+    A([Cajero en /pos]) --> B["Agrega productos al carrito<br/>elige cliente (opcional) y descuento"]
     B --> C["POST /api/ventas (JSON con items)"]
     C --> D["require_api_login()"]
     D --> E["BEGIN TRANSACTION"]
@@ -147,16 +139,14 @@ flowchart TD
 
     I --> J{"¿Descuento ><br/>subtotal?"}
     J -->|Sí| H
-    J -->|No| K["Calcula:<br/>IVA 12% · total"]
+    J -->|No| K["total = subtotal − descuento<br/>(sin IVA)"]
 
     K --> L["INSERT ventas (cabecera)"]
     L --> M["INSERT detalle_ventas<br/>+ UPDATE stock = stock - cantidad"]
-    M --> N["INSERT pagos<br/>(genera referencia QR si aplica)"]
+    M --> N["INSERT pagos (monto en efectivo)"]
     N --> O["COMMIT"]
     O --> P["201 → venta completa (JSON)"]
-
-    P --> Q(["Ver factura<br/>GET /ventas/{id}"])
-    Q --> R["Vista factura.php<br/>+ &lt;img&gt; QR desde api.qrserver.com"]
+    P --> Q(["Aviso: 'Venta #N registrada: Q X en efectivo'"])
 ```
 
 > **Anulación** (`POST /api/ventas/{id}/anular`): solo **admin**. Devuelve el
@@ -166,24 +156,24 @@ flowchart TD
 
 ## 5. Módulos y rutas
 
-| Módulo | Página (web) | API REST | Acceso |
+| Módulo | Pantalla (React) | API REST | Acceso |
 |---|---|---|---|
-| Autenticación | `/login`, `/logout` | `/api/auth/*` | Público / sesión |
-| Dashboard | `/dashboard` | `/api/reportes/dashboard` | Sesión |
-| Inventario | `/productos` | `/api/productos` (CRUD) | Sesión |
-| Categorías | — | `/api/categorias` (CRUD) | Sesión |
+| Autenticación | `/login`, `/registro` | `/api/auth/*` | Público / sesión |
+| Dashboard | `/dashboard` | `/api/reportes/dashboard`, `/api/clima` | Sesión |
+| Inventario | `/productos` | `/api/productos` (CRUD) | Sesión (editar: admin) |
+| Categorías | — | `/api/categorias` (CRUD) | Sesión (editar: admin) |
 | Punto de Venta | `/pos` | `POST /api/ventas` | Sesión |
-| Ventas | `/ventas`, `/ventas/{id}` (factura) | `/api/ventas`, `.../anular` | Sesión / admin |
+| Ventas | `/ventas` (con detalle de cada venta) | `/api/ventas`, `.../anular` | Sesión / admin |
 | Clientes | `/clientes` | `/api/clientes` (CRUD) | Sesión |
 | Reportes | `/reportes` | `/api/reportes/*` | Sesión |
-| Usuarios | `/usuarios` | — (render en servidor) | **Solo admin** |
+| Usuarios | `/usuarios` | `/api/usuarios` | **Solo admin** |
 
 ---
 
 ### Resumen del stack
 
-- **Backend:** PHP 8 (PDO + MySQL), consultas preparadas (anti SQL-injection).
-- **Frontend:** HTML + Bootstrap + JS `fetch` contra la API REST.
+- **Backend:** PHP 8 (PDO + MySQL), consultas preparadas (anti SQL-injection), solo API REST.
+- **Frontend:** React + React Router + Bootstrap, `fetch` contra la API REST.
 - **Sesión:** cookies de sesión PHP; roles `admin` / `cajero`.
-- **Externo:** generación de QR en `api.qrserver.com` (visible en cada factura).
+- **Externo:** OpenWeatherMap (clima, consultado desde el servidor), Chart.js y Google Fonts.
 - **Infra:** Docker / Apache; desplegable en Railway.

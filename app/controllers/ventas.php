@@ -2,7 +2,11 @@
 /**
  * Controlador de Ventas / POS (API REST).
  * Registra la venta de forma atomica (transaccion): cabecera + detalle +
- * pago, y descuenta el stock. Calcula subtotal, IVA (12%) y descuento.
+ * pago, y descuenta el stock.
+ *
+ * Reglas del negocio: los precios del catalogo son finales (no se suma IVA),
+ * todas las ventas se cobran en efectivo y no se emiten facturas.
+ * total = subtotal - descuento.
  */
 
 declare(strict_types=1);
@@ -11,8 +15,7 @@ function api_ventas_list(): void
 {
     require_api_login();
     $rows = db()->query(
-        'SELECT v.id, v.fecha, v.subtotal, v.iva, v.descuento, v.total,
-                v.metodo_pago, v.estado,
+        'SELECT v.id, v.fecha, v.subtotal, v.descuento, v.total, v.estado,
                 u.nombre AS cajero, cl.nombre AS cliente
          FROM ventas v
          JOIN usuarios u  ON u.id = v.id_usuario
@@ -28,7 +31,7 @@ function api_ventas_list(): void
 }
 
 /**
- * Devuelve la venta completa con su detalle (usado por la factura y el QR).
+ * Devuelve la venta completa con su detalle (productos vendidos).
  */
 function api_ventas_get(string $id): void
 {
@@ -45,9 +48,7 @@ function api_ventas_get(string $id): void
  * Cuerpo esperado:
  * {
  *   "id_cliente": 1,
- *   "metodo_pago": "efectivo|tarjeta|QR",
  *   "descuento": 0,
- *   "referencia_api": null,
  *   "items": [ { "id_producto": 4, "cantidad": 2 }, ... ]
  * }
  */
@@ -61,14 +62,10 @@ function api_ventas_create(): void
         json_error('La venta debe tener al menos un producto.', 422);
     }
 
-    $metodo = in_array($in['metodo_pago'] ?? 'efectivo', ['efectivo', 'tarjeta', 'QR'], true)
-        ? $in['metodo_pago'] : 'efectivo';
     $descuento = max(0.0, (float) ($in['descuento'] ?? 0));
     $idCliente = !empty($in['id_cliente']) ? (int) $in['id_cliente'] : null;
 
-    $user  = current_user();
-    $config = require __DIR__ . '/../config.php';
-    $tasaIva = (float) $config['app']['iva'];
+    $user = current_user();
 
     $pdo = db();
     try {
@@ -107,16 +104,15 @@ function api_ventas_create(): void
             throw new RuntimeException('El descuento no puede ser mayor al subtotal.');
         }
 
-        $baseGravable = $subtotal - $descuento;
-        $iva   = round($baseGravable * $tasaIva, 2);
-        $total = round($baseGravable + $iva, 2);
+        // Precios finales: sin IVA
+        $total = round($subtotal - $descuento, 2);
 
         // 2) Insertar cabecera de la venta
         $stmt = $pdo->prepare(
-            'INSERT INTO ventas (id_usuario, id_cliente, subtotal, iva, descuento, total, metodo_pago)
-             VALUES (?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO ventas (id_usuario, id_cliente, subtotal, descuento, total)
+             VALUES (?, ?, ?, ?, ?)'
         );
-        $stmt->execute([$user['id'], $idCliente, $subtotal, $iva, $descuento, $total, $metodo]);
+        $stmt->execute([$user['id'], $idCliente, $subtotal, $descuento, $total]);
         $idVenta = (int) $pdo->lastInsertId();
 
         // 3) Insertar detalle y descontar stock
@@ -130,12 +126,9 @@ function api_ventas_create(): void
             $stmtStock->execute([$l['cantidad'], $l['id_producto']]);
         }
 
-        // 4) Registrar el pago
-        $referencia = $metodo === 'QR' ? ('QR-REF-' . str_pad((string) $idVenta, 6, '0', STR_PAD_LEFT)) : ($in['referencia_api'] ?? null);
-        $stmtPago = $pdo->prepare(
-            'INSERT INTO pagos (id_venta, monto, metodo, referencia_api) VALUES (?, ?, ?, ?)'
-        );
-        $stmtPago->execute([$idVenta, $total, $metodo, $referencia]);
+        // 4) Registrar el pago (siempre en efectivo)
+        $stmtPago = $pdo->prepare('INSERT INTO pagos (id_venta, monto) VALUES (?, ?)');
+        $stmtPago->execute([$idVenta, $total]);
 
         $pdo->commit();
     } catch (Throwable $e) {
@@ -190,7 +183,7 @@ function obtener_venta_completa(int $id): ?array
 {
     $stmt = db()->prepare(
         'SELECT v.*, u.nombre AS cajero,
-                cl.nombre AS cliente_nombre, cl.nit AS cliente_nit, cl.direccion AS cliente_direccion
+                cl.nombre AS cliente_nombre, cl.telefono AS cliente_telefono
          FROM ventas v
          JOIN usuarios u ON u.id = v.id_usuario
          LEFT JOIN clientes cl ON cl.id = v.id_cliente
@@ -210,7 +203,6 @@ function obtener_venta_completa(int $id): ?array
     $det->execute([$id]);
 
     $venta['subtotal']  = (float) $venta['subtotal'];
-    $venta['iva']       = (float) $venta['iva'];
     $venta['descuento'] = (float) $venta['descuento'];
     $venta['total']     = (float) $venta['total'];
     $venta['detalle']   = $det->fetchAll();

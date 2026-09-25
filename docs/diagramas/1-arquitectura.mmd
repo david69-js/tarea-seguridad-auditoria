@@ -2,36 +2,30 @@ flowchart LR
     Usuario([Usuario<br/>navegador])
 
     subgraph Cliente["Frontend (navegador)"]
-        HTML[Páginas HTML<br/>Bootstrap]
-        JS["app.js<br/>fetch() a la API REST"]
+        SPA["SPA React<br/>React Router + Bootstrap"]
+        JS["lib/api.js<br/>fetch() a la API REST"]
     end
 
-    subgraph Servidor["Servidor PHP (Apache/Docker)"]
-        HT[".htaccess<br/>reescribe todo →"]
-        FC["public/index.php<br/>Front Controller / Router"]
-
-        subgraph Ctrls["Controladores"]
-            WEB["web.php<br/>(páginas)"]
-            API["auth · productos · categorias<br/>clientes · ventas · reportes<br/>(API REST → JSON)"]
-        end
-
-        HELP["helpers.php<br/>sesión, roles, view(), JSON"]
+    subgraph Servidor["Servidor (Apache/Docker)"]
+        HT[".htaccess"]
+        EST["public/app/<br/>index.html + JS/CSS"]
+        FC["public/index.php<br/>Router de la API"]
+        API["auth · productos · categorias<br/>clientes · ventas · reportes<br/>usuarios · clima"]
+        HELP["helpers.php<br/>JSON, sesión, roles"]
         DBP["db.php (PDO singleton)"]
     end
 
     DB[("MySQL<br/>pos_tienda")]
-    QR["API externa QR<br/>api.qrserver.com"]
+    OWM["OpenWeatherMap<br/>(clima del dashboard)"]
 
-    Usuario --> HTML
-    HTML --> JS
-    JS -->|"HTTP + cookies de sesión"| HT
-    Usuario -->|"navegación de páginas"| HT
-    HT --> FC
-    FC --> WEB
+    Usuario --> SPA
+    SPA --> JS
+    Usuario -->|"/login, /pos, ..."| HT
+    HT -->|"rutas de pantalla"| EST
+    JS -->|"/api/* + cookie de sesión"| HT
+    HT -->|"/api/*"| FC
     FC --> API
-    WEB --> HELP
     API --> HELP
-    WEB --> DBP
     API --> DBP
     DBP --> DB
-    HTML -.->|"img del QR"| QR
+    API -.->|"clima.php (desde el servidor)"| OWM

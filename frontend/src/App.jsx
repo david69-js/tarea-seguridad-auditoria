@@ -8,7 +8,6 @@ import Dashboard from './pages/Dashboard';
 import Pos from './pages/Pos';
 import Productos from './pages/Productos';
 import Ventas from './pages/Ventas';
-import Factura from './pages/Factura';
 import Clientes from './pages/Clientes';
 import Reportes from './pages/Reportes';
 import Usuarios from './pages/Usuarios';
@@ -57,9 +56,6 @@ export default function App() {
             </Route>
 
             <Route element={<RequiereSesion />}>
-                {/* Factura imprimible: pantalla completa, sin menú lateral */}
-                <Route path="/ventas/:id" element={<Factura />} />
-
                 <Route element={<Layout />}>
                     <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     <Route path="/dashboard" element={<Dashboard />} />

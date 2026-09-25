@@ -52,11 +52,8 @@ $config = [
     ],
     'app' => [
         'name'     => 'POS Tienda',
-        'iva'      => 0.12,          // IVA 12%
         'moneda'   => 'GTQ',
         'empresa'  => 'Tienda Bugambilias',
-        // API externa de codigos QR (funcionalidad visible en cada factura)
-        'qr_api'   => 'https://api.qrserver.com/v1/create-qr-code/',
     ],
 ];
 

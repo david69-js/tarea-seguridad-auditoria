@@ -9,25 +9,26 @@ Objetivo del rubro: **demo en vivo sin errores + explicar la arquitectura y el c
 - [ ] Tener la URL pública de Railway abierta y con sesión lista para iniciar.
 - [ ] Tener el repositorio de GitHub abierto en otra pestaña.
 - [ ] Tener el diagrama ER a la mano.
-- [ ] Repasar el flujo: login → dashboard → POS → factura → reportes.
+- [ ] Repasar el flujo: login → dashboard → POS → historial de ventas → reportes.
 
 ---
 
 ## Minuto a minuto
 
 **0:00 – 1:00 · Introducción**
-- "Es un POS web para una tienda familiar, la Tienda Bugambilias, hecho con PHP 8, MySQL y Bootstrap 5, desplegado en Railway."
-- Mencionar los 3 servicios externos: QR, Chart.js y Google Fonts.
+- "Es un POS web para una tienda familiar, la Tienda Bugambilias, con frontend en React y una API REST en PHP 8 con MySQL, desplegado en Railway."
+- Mencionar los 3 servicios externos: OpenWeatherMap (clima), Chart.js y Google Fonts.
 
 **1:00 – 2:30 · Login y seguridad**
 - Iniciar sesión como **admin**.
-- Explicar: "Las contraseñas se guardan con bcrypt, no en texto plano. Las rutas están protegidas: sin sesión la API responde 401 y la web redirige al login."
+- Explicar: "Las contraseñas se guardan con bcrypt, no en texto plano. Las rutas están protegidas: sin sesión la API responde 401 y React vuelve al login."
 - Mencionar los dos roles (admin y cajero).
 
 **2:30 – 4:30 · Punto de Venta (lo más importante)**
 - Buscar un producto, agregarlo al carrito, cambiar cantidades.
-- Mostrar el cálculo automático de **Subtotal, IVA 12% y Total**, aplicar un **descuento**.
-- Presionar **Cobrar** → se abre la **factura con código QR** (API externa).
+- Mostrar el cálculo automático de **Subtotal y Total**, aplicar un **descuento**.
+- Explicar las reglas de la tienda: precios finales **sin IVA**, cobro **solo en efectivo** y **sin facturas**.
+- Presionar **Cobrar** → aviso con el número de venta y el monto; en **Ventas** se abre su **detalle**.
 - Explicar: "La venta se registra en una transacción; si algo falla, se revierte y no se descuenta stock."
 
 **4:30 – 5:30 · Inventario**
@@ -39,15 +40,15 @@ Objetivo del rubro: **demo en vivo sin errores + explicar la arquitectura y el c
 - En Reportes, generar un reporte por rango de fechas.
 
 **6:30 – 8:30 · Arquitectura y código (parte técnica)**
-- Abrir el repositorio y mostrar la estructura: `public/index.php` (router),
-  `app/controllers/` y `app/views/`.
+- Abrir el repositorio y mostrar la estructura: `frontend/` (React),
+  `public/index.php` (router de la API) y `app/controllers/`.
 - Mostrar **un endpoint** de la API (por ejemplo `api_ventas_create` en
-  `app/controllers/ventas.php`) y explicar la transacción y el cálculo del IVA.
+  `app/controllers/ventas.php`) y explicar la transacción y el cálculo del total (subtotal − descuento).
 - Mostrar el **diagrama ER** y explicar 2–3 relaciones (venta → detalle → producto).
 - Mostrar que todas las consultas usan **PDO preparado** (anti inyección SQL).
 
 **8:30 – 9:30 · Despliegue**
-- Explicar que corre en Railway con `Dockerfile` (PHP + Apache) y MySQL en la nube.
+- Explicar que corre en Railway con `Dockerfile` (compila React y lo sirve con PHP + Apache) y MySQL en la nube.
 - Mostrar la URL pública funcionando.
 
 **9:30 – 10:00 · Cierre**
@@ -70,7 +71,8 @@ La venta corre dentro de una transacción y bloquea la fila del producto
 (`SELECT ... FOR UPDATE`) antes de descontar stock.
 
 **¿Cuáles son tus APIs externas y dónde se ven?**
-QR Code (en la factura), Chart.js (gráficas del dashboard) y Google Fonts
+OpenWeatherMap (clima en el dashboard, consultado desde el servidor para no
+exponer la clave), Chart.js (gráficas del dashboard) y Google Fonts
 (tipografía de toda la interfaz).
 
 **¿Cómo manejas los roles?**

@@ -607,7 +607,7 @@ textarea:focus-visible,
 }
 
 /* ---------------------------------------------------------------------
- * 11. Impresión (reportes y facturas)
+ * 11. Impresión (reportes)
  * ------------------------------------------------------------------- */
 @media print {
     .sidebar, .topbar, .sidebar-backdrop, .no-print,

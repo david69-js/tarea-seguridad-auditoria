@@ -8,7 +8,7 @@ import Modal from '../components/Modal';
 
 /* CRUD de clientes. */
 
-const VACIO = { id: '', nombre: '', nit: 'CF', correo: '', telefono: '', direccion: '' };
+const VACIO = { id: '', nombre: '', correo: '', telefono: '', direccion: '' };
 
 export default function Clientes() {
     const { esAdmin } = useAuth();
@@ -33,7 +33,7 @@ export default function Clientes() {
 
     const abrir = (c = null) => {
         setForm(c
-            ? { id: c.id, nombre: c.nombre, nit: c.nit, correo: c.correo || '', telefono: c.telefono || '', direccion: c.direccion || '' }
+            ? { id: c.id, nombre: c.nombre, correo: c.correo || '', telefono: c.telefono || '', direccion: c.direccion || '' }
             : VACIO);
         setModal(true);
     };
@@ -48,7 +48,6 @@ export default function Clientes() {
     const guardar = async () => {
         const body = {
             nombre: form.nombre.trim(),
-            nit: form.nit.trim(),
             correo: form.correo.trim(),
             telefono: form.telefono.trim(),
             direccion: form.direccion.trim(),
@@ -67,12 +66,12 @@ export default function Clientes() {
     return (
         <>
             <div className="page-head">
-                <p className="page-sub">Clientes registrados para facturación. «CF» equivale a consumidor final.</p>
+                <p className="page-sub">Clientes frecuentes de la tienda. Asignar un cliente a la venta es opcional.</p>
                 <div className="toolbar">
-                    <label className="visually-hidden" htmlFor="buscarCliente">Buscar cliente por nombre o NIT</label>
+                    <label className="visually-hidden" htmlFor="buscarCliente">Buscar cliente por nombre o teléfono</label>
                     <div className="input-group" style={{ maxWidth: 320 }}>
                         <span className="input-group-text"><i className="bi bi-search" aria-hidden="true"></i></span>
-                        <input id="buscarCliente" type="search" className="form-control" placeholder="Buscar por nombre o NIT…"
+                        <input id="buscarCliente" type="search" className="form-control" placeholder="Buscar por nombre o teléfono…"
                                value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
                     </div>
                     <button className="btn btn-primary" type="button" onClick={() => abrir()}>
@@ -88,7 +87,6 @@ export default function Clientes() {
                         <thead>
                             <tr>
                                 <th scope="col">Nombre</th>
-                                <th scope="col">NIT</th>
                                 <th scope="col">Correo</th>
                                 <th scope="col">Teléfono</th>
                                 <th scope="col">Dirección</th>
@@ -96,12 +94,11 @@ export default function Clientes() {
                             </tr>
                         </thead>
                         <tbody>
-                            {clientes === null && <FilaVacia columnas={6}>Cargando clientes…</FilaVacia>}
-                            {clientes?.length === 0 && <FilaVacia columnas={6} icono="bi-people">No hay clientes que coincidan.</FilaVacia>}
+                            {clientes === null && <FilaVacia columnas={5}>Cargando clientes…</FilaVacia>}
+                            {clientes?.length === 0 && <FilaVacia columnas={5} icono="bi-people">No hay clientes que coincidan.</FilaVacia>}
                             {clientes?.map((c) => (
                                 <tr key={c.id}>
                                     <td className="fw-semibold">{c.nombre}</td>
-                                    <td><code>{c.nit}</code></td>
                                     <td>{c.correo || '—'}</td>
                                     <td>{c.telefono || '—'}</td>
                                     <td className="text-muted">{c.direccion || '—'}</td>
@@ -139,16 +136,10 @@ export default function Clientes() {
                     <input id="cliNombre" name="nombre" className="form-control" required autoComplete="name"
                            value={form.nombre} onChange={campo} />
                 </div>
-                <div className="row g-3">
-                    <div className="col-sm-6">
-                        <label className="form-label" htmlFor="cliNit">NIT</label>
-                        <input id="cliNit" name="nit" className="form-control" value={form.nit} onChange={campo} />
-                    </div>
-                    <div className="col-sm-6">
-                        <label className="form-label" htmlFor="cliTelefono">Teléfono</label>
-                        <input id="cliTelefono" name="telefono" type="tel" className="form-control" autoComplete="tel"
-                               value={form.telefono} onChange={campo} />
-                    </div>
+                <div>
+                    <label className="form-label" htmlFor="cliTelefono">Teléfono</label>
+                    <input id="cliTelefono" name="telefono" type="tel" className="form-control" autoComplete="tel"
+                           value={form.telefono} onChange={campo} />
                 </div>
                 <div className="mt-3">
                     <label className="form-label" htmlFor="cliCorreo">Correo</label>

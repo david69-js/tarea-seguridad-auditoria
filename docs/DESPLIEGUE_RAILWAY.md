@@ -76,7 +76,7 @@ Usar la pestaña **Data** del servicio MySQL en Railway y pegar el contenido del
 - [ ] La URL pública abre la pantalla de login.
 - [ ] Se puede iniciar sesión.
 - [ ] El dashboard muestra datos (KPIs y gráficas).
-- [ ] Se puede registrar una venta y ver la factura con QR.
+- [ ] Se puede registrar una venta en efectivo y ver su detalle en **Ventas**.
 
 ---
 

@@ -81,7 +81,7 @@ function api_reportes_ventas(): void
     $hasta = $_GET['hasta'] ?? date('Y-m-d');
 
     $stmt = db()->prepare(
-        "SELECT v.id, v.fecha, v.subtotal, v.iva, v.descuento, v.total, v.metodo_pago, v.estado,
+        "SELECT v.id, v.fecha, v.subtotal, v.descuento, v.total, v.estado,
                 u.nombre AS cajero, cl.nombre AS cliente
          FROM ventas v
          JOIN usuarios u ON u.id = v.id_usuario
@@ -94,7 +94,7 @@ function api_reportes_ventas(): void
 
     $resumen = db()->prepare(
         "SELECT COUNT(*) AS num, COALESCE(SUM(total),0) AS total,
-                COALESCE(SUM(iva),0) AS iva, COALESCE(SUM(descuento),0) AS descuento
+                COALESCE(SUM(descuento),0) AS descuento
          FROM ventas WHERE estado='completada' AND DATE(fecha) BETWEEN ? AND ?"
     );
     $resumen->execute([$desde, $hasta]);
