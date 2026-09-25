@@ -26,3 +26,6 @@ Thumbs.db
 
 # Documento original de la tarea
 Tarea_POS_Web.docx
+
+# Archivos temporales de Word mientras un documento está abierto
+~$*

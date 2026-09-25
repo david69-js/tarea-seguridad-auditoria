@@ -2,7 +2,7 @@
  *  Pruebas de caja negra (Jest) — Modulo Autenticacion (Login/Registro)
  *  Proyecto: Sistema POS Web — Tienda Bugambilias (pos_tienda)
  *
- *  Ejecuta los 5 casos documentados en "Formato_Casos_Prueba_POS_Web.docx"
+ *  Ejecuta los 5 casos del Módulo 1 documentados en "Plan_Pruebas_y_Formato_Estandar_POS_Web.docx"
  *  contra la API REST corriendo (POST /api/auth/login y /api/auth/register).
  *
  *  Requisito: la app debe estar levantada (docker compose up) en:
