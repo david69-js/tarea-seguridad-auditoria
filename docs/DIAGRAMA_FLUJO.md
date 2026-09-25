@@ -160,12 +160,12 @@ flowchart TD
 |---|---|---|---|
 | Autenticación | `/login`, `/registro` | `/api/auth/*` | Público / sesión |
 | Dashboard | `/dashboard` | `/api/reportes/dashboard`, `/api/clima` | Sesión |
-| Inventario | `/productos` | `/api/productos` (CRUD) | Sesión (editar: admin) |
+| Inventario | `/productos` (costo y ganancia: solo admin) | `/api/productos` (CRUD) | Sesión (editar: admin) |
 | Categorías | — | `/api/categorias` (CRUD) | Sesión (editar: admin) |
 | Punto de Venta | `/pos` | `POST /api/ventas` | Sesión |
 | Ventas | `/ventas` (con detalle de cada venta) | `/api/ventas`, `.../anular` | Sesión / admin |
 | Clientes | `/clientes` | `/api/clientes` (CRUD) | Sesión |
-| Reportes | `/reportes` | `/api/reportes/*` | Sesión |
+| Reportes | `/reportes` (rentabilidad: solo admin) | `/api/reportes/*`, `/api/reportes/rentabilidad` | Sesión / admin |
 | Usuarios | `/usuarios` | `/api/usuarios` | **Solo admin** |
 
 ---

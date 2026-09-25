@@ -82,6 +82,14 @@ Vite reenvía `/api` y `/uploads` al contenedor (`http://localhost:8091`), así
 que la cookie de sesión funciona igual que en producción. Si el contenedor
 usa otro puerto: `API_URL=http://localhost:9000 npm run dev`.
 
+Pruebas del frontend (Jest + React Testing Library, sin necesidad del backend:
+la API se simula en cada prueba):
+
+```bash
+cd frontend
+npm test
+```
+
 `npm run build` genera `public/app/`, que es lo que sirve Apache. No hace
 falta hacerlo a mano para Docker ni Railway: el `Dockerfile` compila el
 frontend en una etapa con Node y copia solo el resultado a la imagen PHP.
@@ -155,9 +163,9 @@ Los endpoints marcados con 🔒 requieren sesión; los marcados con 👑 requier
 
 | Método | Endpoint | Descripción | Códigos |
 |--------|----------|-------------|---------|
-| `GET`    | `/api/productos` 🔒 | Lista productos. Query: `?q=`, `?categoria=`, `?stock_bajo=1` | `200` |
+| `GET`    | `/api/productos` 🔒 | Lista productos. Query: `?q=`, `?categoria=`, `?stock_bajo=1`. A un admin le agrega `precio_compra`, `ganancia` y `margen` | `200` |
 | `GET`    | `/api/productos/{id}` 🔒 | Detalle de un producto | `200`, `404` |
-| `POST`   | `/api/productos` 👑 | Crea un producto (acepta imagen multipart) | `201`, `409`, `422` |
+| `POST`   | `/api/productos` 👑 | Crea un producto. Obligatorios: `codigo`, `nombre`, `precio_compra`, `precio` (venta). Acepta imagen multipart | `201`, `409`, `422` |
 | `PUT`    | `/api/productos/{id}` 👑 | Actualiza un producto | `200`, `404` |
 | `DELETE` | `/api/productos/{id}` 👑 | Baja lógica del producto | `200`, `404` |
 
@@ -208,6 +216,7 @@ Los endpoints marcados con 🔒 requieren sesión; los marcados con 👑 requier
 | `GET` | `/api/reportes/dashboard` 🔒 | KPIs + ventas por día/mes + top productos | `200` |
 | `GET` | `/api/reportes/ventas` 🔒 | Reporte por rango. Query: `?desde=&hasta=` | `200` |
 | `GET` | `/api/reportes/productos-vendidos` 🔒 | Ranking de productos más vendidos | `200` |
+| `GET` | `/api/reportes/rentabilidad` 👑 | Ganancia por producto (más y menos rentables), ganancia bruta, descuentos y ganancia neta. Query: `?desde=&hasta=` | `200`, `403` |
 
 ### Clima (API externa)
 
@@ -296,6 +305,8 @@ Ver la guía paso a paso en [`docs/DESPLIEGUE_RAILWAY.md`](docs/DESPLIEGUE_RAILW
   degradarse, desactivarse ni borrarse a sí mismo, y siempre debe quedar al menos
   un administrador activo.
 - La **clave de OpenWeather se usa solo en el servidor**; el navegador nunca la ve.
+- El **precio de compra y la ganancia** son información del dueño: la API solo los
+  envía a administradores (a un cajero ni siquiera le llegan en el JSON).
 
 ---
 

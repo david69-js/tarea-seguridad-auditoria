@@ -34,7 +34,8 @@ erDiagram
         varchar codigo UK
         varchar nombre
         text descripcion
-        decimal precio
+        decimal precio_compra
+        decimal precio "precio de venta"
         int stock
         int id_categoria FK
         varchar imagen_url
@@ -64,6 +65,7 @@ erDiagram
         int id_producto FK
         int cantidad
         decimal precio_unitario
+        decimal costo_unitario "precio de compra al vender"
         decimal subtotal
     }
     pagos {

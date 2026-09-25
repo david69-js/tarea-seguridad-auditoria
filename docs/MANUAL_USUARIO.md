@@ -69,11 +69,14 @@ Al ingresar verás:
 
 - **Buscar:** por nombre o código.
 - **Filtrar:** por categoría.
-- **Nuevo producto:** botón azul → llenar código, nombre, precio, stock,
+- **Nuevo producto:** botón azul → llenar código, nombre, **precio de compra**, **precio de venta**, stock,
   categoría e (opcional) imagen → **Guardar**.
 - **Editar:** botón del lápiz en cada fila.
 - **Eliminar:** botón del bote de basura (baja lógica; la venta histórica se conserva).
 - **Alerta de stock:** los productos con menos de 5 unidades se muestran en rojo.
+- **Ganancia (solo Administrador):** el inventario muestra precio de compra, precio
+  de venta y la ganancia por unidad (venta − compra) con su margen en %. El
+  formulario la calcula mientras se escriben los precios.
 
 ---
 
@@ -99,6 +102,9 @@ Al ingresar verás:
 - Elegir un rango de fechas **Desde / Hasta** y presionar **Generar**.
 - Muestra: número de ventas, total vendido, promedio por venta y descuentos.
 - Tabla de ventas del período y ranking de **productos más vendidos**.
+- **Rentabilidad (solo Administrador):** ganancia bruta, descuentos y ganancia neta
+  del período, y la lista de productos ordenada por ganancia generada, con los
+  **más rentables** y los **menos rentables** marcados.
 - Botón **Imprimir / PDF** para exportar el reporte.
 
 ---
