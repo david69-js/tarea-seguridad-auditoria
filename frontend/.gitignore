@@ -1,0 +1,38 @@
+# Dependencias
+node_modules/
+
+# Build (Vite). En este proyecto el build va a ../public/app, fuera de esta
+# carpeta; dist/ cubre el caso de compilar con el outDir por defecto.
+dist/
+dist-ssr/
+*.local
+
+# Variables de entorno
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Caché de herramientas
+.vite/
+.eslintcache
+coverage/
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
