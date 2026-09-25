@@ -13,7 +13,10 @@ function web_login_form(): void
         header('Location: ' . base_url('/dashboard'));
         return;
     }
-    view('auth/login', ['error' => $_GET['error'] ?? null], null);
+    view('auth/login', [
+        'error'      => $_GET['error'] ?? null,
+        'registrado' => isset($_GET['registrado']),
+    ], null);
 }
 
 function web_login_submit(): void
@@ -39,6 +42,67 @@ function web_login_submit(): void
         'rol'    => $user['rol'],
     ];
     header('Location: ' . base_url('/dashboard'));
+}
+
+/**
+ * Formulario de registro de nuevo usuario (alta publica).
+ * Los usuarios creados aqui son siempre cajeros; solo un administrador
+ * puede promover a otro administrador desde el modulo de Usuarios.
+ */
+function web_registro_form(array $datos = [], ?string $error = null): void
+{
+    if (is_logged_in()) {
+        header('Location: ' . base_url('/dashboard'));
+        return;
+    }
+    view('auth/registro', ['error' => $error, 'old' => $datos], null);
+}
+
+function web_registro_submit(): void
+{
+    start_session();
+
+    $nombre = trim($_POST['nombre'] ?? '');
+    $correo = trim($_POST['correo'] ?? '');
+    $pass   = (string) ($_POST['password'] ?? '');
+    $pass2  = (string) ($_POST['password2'] ?? '');
+    $old    = ['nombre' => $nombre, 'correo' => $correo];
+
+    // --- Validacion del lado del servidor (la del navegador no basta) ---
+    if ($nombre === '' || $correo === '' || $pass === '') {
+        web_registro_form($old, 'Todos los campos son obligatorios.');
+        return;
+    }
+    if (mb_strlen($nombre) < 3) {
+        web_registro_form($old, 'El nombre debe tener al menos 3 caracteres.');
+        return;
+    }
+    if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+        web_registro_form($old, 'El correo electrónico no tiene un formato válido.');
+        return;
+    }
+    if (strlen($pass) < 6) {
+        web_registro_form($old, 'La contraseña debe tener al menos 6 caracteres.');
+        return;
+    }
+    if ($pass !== $pass2) {
+        web_registro_form($old, 'Las contraseñas no coinciden.');
+        return;
+    }
+
+    $existe = db()->prepare('SELECT id FROM usuarios WHERE correo = ?');
+    $existe->execute([$correo]);
+    if ($existe->fetch()) {
+        web_registro_form($old, 'Ya existe una cuenta registrada con ese correo.');
+        return;
+    }
+
+    $stmt = db()->prepare(
+        'INSERT INTO usuarios (nombre, correo, password_hash, rol) VALUES (?, ?, ?, ?)'
+    );
+    $stmt->execute([$nombre, $correo, password_hash($pass, PASSWORD_BCRYPT), 'cajero']);
+
+    header('Location: ' . base_url('/login?registrado=1'));
 }
 
 function web_logout(): void
@@ -106,7 +170,7 @@ function web_usuarios(): void
         view('errors/403', [], 'layout/main');
         return;
     }
-    // Listado simple de usuarios (renderizado en servidor).
-    $usuarios = db()->query('SELECT id, nombre, correo, rol, activo, created_at FROM usuarios ORDER BY id')->fetchAll();
-    view('usuarios', ['titulo' => 'Usuarios del Sistema', 'usuarios' => $usuarios]);
+    // El listado se pinta desde /api/usuarios para poder crear, editar y
+    // dar de baja sin recargar la pagina.
+    view('usuarios', ['titulo' => 'Usuarios del Sistema']);
 }

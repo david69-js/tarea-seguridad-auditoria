@@ -121,6 +121,26 @@ function base_url(string $path = ''): string
     return $base . '/' . ltrim($path, '/');
 }
 
+/**
+ * URL de un archivo estatico con marca de version.
+ *
+ * Apache no manda Cache-Control para los estaticos, asi que el navegador
+ * aplica cache heuristica y puede seguir usando una copia vieja del CSS o
+ * del JS durante horas. Con HTML nuevo y CSS viejo la pagina se ve rota.
+ * Anadir ?v=<fecha de modificacion> cambia la URL en cuanto se edita el
+ * archivo, de modo que el navegador esta obligado a descargarlo de nuevo.
+ */
+function asset_url(string $path): string
+{
+    $rel     = ltrim($path, '/');
+    $archivo = __DIR__ . '/../public/' . $rel;
+    $url     = base_url('/' . $rel);
+
+    $version = is_file($archivo) ? filemtime($archivo) : false;
+
+    return $version === false ? $url : $url . '?v=' . $version;
+}
+
 /** Escapa texto para mostrarlo en HTML (previene XSS). */
 function e(?string $text): string
 {

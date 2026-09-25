@@ -102,13 +102,25 @@ arranca, reiniciándose una y otra vez.
    ```
 2. En Railway → servicio **web** → **Settings** → **Build**:
    - En **Builder**, seleccionar **Dockerfile** (no Nixpacks).
-3. Hacer **Redeploy** (o `Deploy` del último commit).
-4. En los logs debe aparecer:
-   `mpm_prefork:notice ... Apache/2.4 ... resuming normal operations`
-   y **ya no** el error de MPM.
+3. Hacer **Redeploy** (o `Deploy` del último commit). Si el error persiste,
+   marcar **"Redeploy without cache"** para descartar una imagen cacheada.
+4. En los logs debe aparecer, en este orden:
+   ```
+   [entrypoint] Apache escuchando en el puerto 8080
+   [entrypoint] MPM cargado: mpm_prefork.load
+   ... [mpm_prefork:notice] ... Apache/2.4 ... resuming normal operations
+   ```
+   La línea `[entrypoint]` **solo existe en nuestro `Dockerfile`**: si no
+   aparece, Railway sigue construyendo con Nixpacks y hay que corregir el
+   builder (paso 2).
 
-> Nuestro `Dockerfile` además desactiva explícitamente `mpm_event`/`mpm_worker`
-> y deja solo `mpm_prefork`, así que con el builder correcto el error desaparece.
+> Nuestro `Dockerfile` no usa `a2dismod` (que falla en silencio cuando el
+> módulo no está habilitado). En su lugar borra *todos* los enlaces
+> `mods-enabled/mpm_*` y crea únicamente los de `mpm_prefork`, el único MPM
+> compatible con `mod_php`. Además el build ejecuta una verificación
+> (`test "$mpms" = "1"` + `apache2ctl -t`), así que **una imagen con dos MPM
+> ni siquiera llega a construirse**: falla el build con un mensaje claro en
+> lugar de romperse en producción.
 
 **Verificado localmente:** con el `Dockerfile` del proyecto, Apache carga un solo
 MPM (`mpm_prefork`) y responde HTTP 200 sin errores.

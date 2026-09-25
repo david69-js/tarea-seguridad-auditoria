@@ -15,8 +15,20 @@ Guía básica para usar el sistema de punto de venta.
 | Administrador | `admin@libreria.com` | `admin123` | Todo: inventario, ventas, clientes, usuarios, anular ventas |
 | Cajero | `cajero@libreria.com` | `cajero123` | Vender, ver inventario, clientes y reportes |
 
+> Los campos del login llegan **vacíos**: por seguridad, el sistema no muestra
+> ninguna credencial en pantalla. Estas cuentas de prueba solo están en la
+> documentación.
+>
+> El botón del **ojo** junto a la contraseña permite verla mientras la escribes.
 > Si escribes mal las credenciales, verás el mensaje "Credenciales inválidas".
 > Para salir, usa **Cerrar sesión** en la parte inferior del menú lateral.
+
+### Crear una cuenta nueva
+
+En el login, el enlace **Registrarse** abre el formulario de alta. Se piden
+nombre, correo y contraseña (mínimo 6 caracteres, repetida para confirmar).
+Las cuentas creadas así siempre entran con rol **cajero**; solo un
+administrador puede convertirlas en administrador desde *Usuarios*.
 
 ---
 
@@ -27,6 +39,10 @@ Al ingresar verás:
 - **Tarjetas KPI:** ventas de hoy, ventas del mes, productos activos y alertas de stock bajo.
 - **Gráficas (Chart.js):** ventas de los últimos 7 días, ventas por mes y productos más vendidos.
 - **Alertas de inventario:** lista de productos con stock menor a 5 unidades.
+- **Clima actual:** temperatura, sensación térmica, humedad y viento de la ciudad
+  configurada (servicio externo OpenWeatherMap). Si el administrador del sistema
+  no configuró la clave del servicio, la tarjeta lo indica y el resto del
+  dashboard funciona igual.
 
 ---
 
@@ -87,8 +103,19 @@ Al ingresar verás:
 
 ## 8. Usuarios (solo Administrador)
 
-- Ver la lista de usuarios y sus roles.
+- **Buscar:** por nombre o correo.
 - **Nuevo usuario:** nombre, correo, contraseña (mín. 6) y rol (cajero o administrador).
+- **Editar** (botón del lápiz): cambia nombre, correo, rol y estado.
+  Para **cambiar la contraseña**, escribe una nueva; si dejas ese campo vacío se
+  conserva la que ya tenía.
+- **Activar / desactivar** (botón del interruptor): un usuario inactivo no puede
+  iniciar sesión, pero sus ventas quedan en el historial.
+- **Eliminar** (botón del bote de basura): si el usuario tiene ventas registradas
+  el sistema lo desactiva en lugar de borrarlo, para no perder el historial.
+
+> Reglas que el sistema aplica siempre: no puedes quitarte a ti mismo el rol de
+> administrador, desactivarte ni eliminarte, y nunca puede quedar el sistema sin
+> al menos un administrador activo.
 
 ---
 
@@ -102,3 +129,15 @@ Es correcto: esas acciones son solo para el Administrador.
 
 **La factura no muestra el código QR.**
 El QR se genera con un servicio externo (api.qrserver.com); requiere conexión a Internet.
+
+**El dashboard dice "Clima no disponible".**
+Falta configurar la clave gratuita de OpenWeatherMap (`OPENWEATHER_API_KEY`).
+Es opcional: no afecta a ventas, inventario ni reportes.
+
+**Olvidé mi contraseña.**
+Un administrador puede asignarte una nueva desde *Usuarios* → botón del lápiz →
+escribir la contraseña nueva → **Guardar**.
+
+**¿Se ve bien en celular o tablet?**
+Sí. En pantallas pequeñas el menú lateral se abre con el botón ☰ de la barra
+superior y se cierra con la tecla `Esc` o tocando fuera de él.
