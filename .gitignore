@@ -4,8 +4,12 @@
 
 # Dependencias
 /vendor/
-/node_modules/
+node_modules/
 package-lock.json
+!frontend/package-lock.json
+
+# Build del frontend (se genera con "npm run build" o en el Dockerfile)
+/public/app/
 
 # Imágenes subidas por usuarios (se conserva la carpeta con .gitkeep)
 /public/uploads/*

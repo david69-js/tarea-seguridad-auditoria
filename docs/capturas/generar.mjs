@@ -34,13 +34,11 @@ const captura = async (nombre) => {
 await page.goto(BASE + '/login', { waitUntil: 'networkidle2' });
 await captura('00-login');
 
-// Sesión de administrador
-await page.evaluate(() => {
-  document.querySelector('#correo').value = 'admin@libreria.com';
-  document.querySelector('#password').value = 'admin123';
-});
-await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle2' }),
-                   page.evaluate(() => document.querySelector('form').submit())]);
+// Sesión de administrador. Se teclea en los campos (en vez de asignar
+// .value) porque React solo ve lo que llega por eventos de teclado.
+await page.type('#correo', 'admin@libreria.com');
+await page.type('#password', 'admin123');
+await Promise.all([page.waitForSelector('.sidebar'), page.click('button[type=submit]')]);
 
 for (const [ruta, nombre] of [
   ['/dashboard', '01-dashboard'], ['/pos', '02-pos'], ['/productos', '03-inventario'],

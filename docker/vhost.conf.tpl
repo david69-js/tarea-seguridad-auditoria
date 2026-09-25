@@ -16,16 +16,14 @@
     # -----------------------------------------------------------------
     #  Cache de los archivos estaticos
     #
-    #  Sin cabecera Cache-Control el navegador aplica cache heuristica y
-    #  puede reutilizar un CSS o un JS viejo durante horas. Con HTML nuevo
-    #  y CSS viejo la interfaz se ve rota. "no-cache" no impide guardar el
-    #  archivo: obliga a revalidarlo, asi que si no cambio la respuesta es
-    #  un 304 vacio (rapido) y si cambio se descarga la version nueva.
-    #  Las URLs ademas llevan ?v=<fecha> (ver asset_url en helpers.php).
+    #  Vite pone un hash en el nombre de cada JS/CSS compilado
+    #  (index-3f9a1c.js): si el archivo cambia, cambia la URL. Por eso se
+    #  pueden cachear un ano sin riesgo de servir una version vieja. El
+    #  index.html que los referencia se marca no-cache en .htaccess.
     # -----------------------------------------------------------------
     <IfModule mod_headers.c>
-        <LocationMatch "^/assets/">
-            Header set Cache-Control "no-cache"
+        <LocationMatch "^/app/assets/">
+            Header set Cache-Control "public, max-age=31536000, immutable"
         </LocationMatch>
     </IfModule>
 

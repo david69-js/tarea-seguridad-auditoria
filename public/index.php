@@ -1,11 +1,10 @@
 <?php
 /**
- * Front Controller / Router
+ * Front Controller / Router de la API REST
  * -------------------------------------------------------------
- * Punto de entrada unico de la aplicacion. Todas las peticiones
- * pasan por aqui (ver .htaccess). Despacha:
- *   - Rutas web   -> paginas renderizadas con Bootstrap
- *   - Rutas /api  -> API REST propia (respuestas JSON)
+ * Punto de entrada unico del backend. Apache envia aqui todas las
+ * peticiones a /api/* (ver .htaccess) y todas responden JSON.
+ * El frontend (React) es estatico: Apache lo sirve desde public/app/.
  */
 
 declare(strict_types=1);
@@ -48,27 +47,12 @@ set_exception_handler(static function (Throwable $e) use ($appDebug): void {
         http_response_code(500);
     }
 
-    $esApi = str_contains((string) ($_SERVER['REQUEST_URI'] ?? ''), '/api/');
-    $detalle = $appDebug ? $e->getMessage() : null;
-
-    if ($esApi) {
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode([
-            'ok'      => false,
-            'mensaje' => 'Error interno del servidor.',
-            'detalle' => $detalle,
-        ], JSON_UNESCAPED_UNICODE);
-        return;
-    }
-
-    header('Content-Type: text/html; charset=utf-8');
-    echo '<!doctype html><meta charset="utf-8">'
-        . '<title>Error interno</title>'
-        . '<p>Ha ocurrido un error interno. Intentelo de nuevo mas tarde.</p>';
-
-    if ($detalle !== null) {
-        echo '<pre>' . htmlspecialchars($detalle, ENT_QUOTES, 'UTF-8') . '</pre>';
-    }
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'ok'      => false,
+        'mensaje' => 'Error interno del servidor.',
+        'detalle' => $appDebug ? $e->getMessage() : null,
+    ], JSON_UNESCAPED_UNICODE);
 });
 
 /* ------------------------------------------------------------------ */
@@ -127,32 +111,9 @@ function dispatch(string $method, string $path): void
     }
 
     // No hubo coincidencia
-    if (strpos($path, '/api') === 0) {
-        json_error($matchedPathButNotMethod ? 'Metodo no permitido' : 'Endpoint no encontrado',
-                   $matchedPathButNotMethod ? 405 : 404);
-    }
-
-    http_response_code(404);
-    view('errors/404', [], 'layout/main');
+    json_error($matchedPathButNotMethod ? 'Metodo no permitido' : 'Endpoint no encontrado',
+               $matchedPathButNotMethod ? 405 : 404);
 }
-
-/* ================================================================== */
-/*  RUTAS WEB (paginas)                                                */
-/* ================================================================== */
-route('GET',  '/',           fn() => header('Location: ' . base_url('/dashboard')));
-route('GET',  '/login',      'web_login_form');
-route('POST', '/login',      'web_login_submit');
-route('GET',  '/registro',   'web_registro_form');
-route('POST', '/registro',   'web_registro_submit');
-route('GET',  '/logout',     'web_logout');
-route('GET',  '/dashboard',  'web_dashboard');
-route('GET',  '/productos',  'web_productos');
-route('GET',  '/pos',        'web_pos');
-route('GET',  '/ventas',     'web_ventas');
-route('GET',  '/ventas/{id}','web_venta_detalle');   // factura imprimible
-route('GET',  '/clientes',   'web_clientes');
-route('GET',  '/reportes',   'web_reportes');
-route('GET',  '/usuarios',   'web_usuarios');         // solo admin
 
 /* ================================================================== */
 /*  API REST PROPIA  (todas responden JSON)                            */

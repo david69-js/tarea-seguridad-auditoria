@@ -13,12 +13,12 @@ gráficas, autenticación con roles y una **API REST propia** documentada.
 
 | Capa | Tecnología |
 |------|------------|
-| Frontend | HTML5 + CSS3 + JavaScript ES6, **Bootstrap 5**, Bootstrap Icons |
-| Backend | **PHP 8.3** (PDO, sin framework — "PHP puro" organizado) |
+| Frontend | **React 18** + React Router (SPA compilada con **Vite**), **Bootstrap 5**, Bootstrap Icons |
+| Backend | **PHP 8.3** (PDO, sin framework) — solo API REST, sin vistas |
 | Base de datos | **MySQL 8 / MariaDB** |
 | Autenticación | Sesiones PHP + **bcrypt** (`password_hash`), roles admin/cajero |
 | API REST | JSON + métodos HTTP + códigos de estado |
-| APIs externas | **QR Code** (api.qrserver.com) · **OpenWeatherMap** · **Chart.js** · **Google Fonts** |
+| APIs externas | **QR Code** (api.qrserver.com) · **OpenWeatherMap** · **Chart.js** (react-chartjs-2) · **Google Fonts** |
 | Contenedores | Docker + Docker Compose |
 | Hosting | Railway.app (PHP + MySQL) |
 
@@ -67,27 +67,57 @@ cuota gratuita en cada recarga.
 
 ---
 
+## 🧑‍💻 Desarrollo del frontend (React)
+
+El frontend es una SPA en `frontend/`. Para trabajar en él con recarga en
+caliente, levante el backend con Docker y, en otra terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev          # http://localhost:5173
+```
+
+Vite reenvía `/api` y `/uploads` al contenedor (`http://localhost:8090`), así
+que la cookie de sesión funciona igual que en producción. Si el contenedor
+usa otro puerto: `API_URL=http://localhost:8091 npm run dev`.
+
+`npm run build` genera `public/app/`, que es lo que sirve Apache. No hace
+falta hacerlo a mano para Docker ni Railway: el `Dockerfile` compila el
+frontend en una etapa con Node y copia solo el resultado a la imagen PHP.
+
+---
+
 ## 📁 Estructura del proyecto
 
 ```
 .
+├── frontend/                # SPA en React (Vite)
+│   ├── src/
+│   │   ├── main.jsx         # Punto de entrada (router + proveedores)
+│   │   ├── App.jsx          # Rutas y protección por sesión / rol
+│   │   ├── pages/           # Pantallas: Dashboard, Pos, Productos, Factura...
+│   │   ├── components/      # Layout, Modal, Kpi, CampoPassword...
+│   │   ├── lib/             # Cliente de la API, sesión, toasts, formato
+│   │   └── styles.css       # Estilos propios sobre Bootstrap
+│   └── vite.config.js       # Build a public/app + proxy de desarrollo
 ├── public/                  # Document root (lo que sirve Apache)
-│   ├── index.php            # Front controller / router (web + API)
-│   ├── .htaccess            # Reescritura de rutas
-│   ├── assets/              # CSS y JavaScript
+│   ├── index.php            # Router de la API REST (/api/*)
+│   ├── .htaccess            # /api/* -> index.php; resto -> app/index.html
+│   ├── app/                 # Build del frontend (generado, no versionado)
 │   └── uploads/             # Imágenes de productos subidas
 ├── app/
 │   ├── config.php           # Configuración (lee variables de entorno)
 │   ├── db.php               # Conexión PDO
-│   ├── helpers.php          # JSON, auth, roles, render de vistas
-│   ├── controllers/         # Lógica: auth, usuarios, productos, ventas,
-│   │                        #         reportes, clima...
-│   └── views/               # Vistas (Bootstrap): dashboard, pos, factura...
+│   ├── helpers.php          # JSON, sesión, autenticación y roles
+│   └── controllers/         # Lógica: auth, usuarios, productos, ventas,
+│                            #         reportes, clima...
 ├── database/
 │   └── pos_libreria.sql     # Script SQL: estructura + datos de prueba
 ├── docs/                    # Manual, diagrama ER, guía de despliegue
-├── Dockerfile               # Imagen PHP 8.3 + Apache
-└── docker-compose.yml       # Entorno local (web + MySQL)
+├── pruebas/                 # Pruebas de caja negra de la API (Jest)
+├── Dockerfile               # Build de React (Node) + PHP 8.3 + Apache
+└── docker-compose.yml       # Entorno local (web + MySQL + phpMyAdmin)
 ```
 
 ---
@@ -249,8 +279,9 @@ Ver la guía paso a paso en [`docs/DESPLIEGUE_RAILWAY.md`](docs/DESPLIEGUE_RAILW
 
 - Contraseñas con **bcrypt** (`password_hash` / `password_verify`), nunca en texto plano.
 - **Consultas preparadas (PDO)** en todas las consultas → previene inyección SQL.
-- **Escape de salida** (`htmlspecialchars` en PHP y `escapeHtml` en JS) → previene XSS.
-- **Rutas protegidas**: sin sesión no se accede (web redirige a login, API responde `401`).
+- **Escape de salida**: React escapa todo lo que se pinta con `{...}` y el código no usa
+  `dangerouslySetInnerHTML` → previene XSS.
+- **Rutas protegidas**: sin sesión no se accede (la API responde `401` y React manda al login).
 - **Control por roles**: acciones de administración exigen rol admin (`403` si no).
 - `session_regenerate_id()` al iniciar sesión → previene fijación de sesión.
 - Las imágenes subidas **no pueden ejecutarse como PHP** (`.htaccess` en `/uploads`).

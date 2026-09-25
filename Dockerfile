@@ -1,7 +1,27 @@
 # =====================================================================
 #  Imagen para el POS Libreria (PHP 8.3 + Apache)
 #  Funciona igual en local (docker compose) y en Railway.app
+#
+#  Dos etapas:
+#    1. "frontend": compila la SPA de React con Node (npm run build).
+#    2. Imagen final: PHP + Apache con la API y solo el resultado del
+#       build (public/app/). Node no queda en la imagen final.
 # =====================================================================
+
+# ---------------------------------------------------------------------
+#  Etapa 1: build del frontend (React + Vite)
+# ---------------------------------------------------------------------
+FROM node:20-alpine AS frontend
+WORKDIR /build/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+# vite.config.js escribe en ../public/app  ->  /build/public/app
+RUN npm run build
+
+# ---------------------------------------------------------------------
+#  Etapa 2: PHP + Apache
+# ---------------------------------------------------------------------
 FROM php:8.3-apache
 
 # ---------------------------------------------------------------------
@@ -28,13 +48,19 @@ COPY docker/vhost.conf.tpl /etc/apache2/vhost.conf.tpl
 COPY docker/entrypoint.sh  /usr/local/bin/entrypoint.sh
 RUN set -eux; \
     chmod +x /usr/local/bin/entrypoint.sh; \
-    sed 's/__PORT__/80/g' /etc/apache2/vhost.conf.tpl \
+    sed 's/__PORT__/81/g' /etc/apache2/vhost.conf.tpl \
         > /etc/apache2/sites-available/000-default.conf; \
     echo 'ServerName localhost' > /etc/apache2/conf-available/servername.conf; \
     a2enconf servername
 
-# Copiar el codigo de la aplicacion
-COPY . /var/www/html
+# Copiar solo lo que usa el servidor: la API, el document root, el script
+# SQL y el migrador. El codigo fuente de React no entra en esta imagen;
+# solo su build (public/app/).
+COPY app/      /var/www/html/app/
+COPY public/   /var/www/html/public/
+COPY database/ /var/www/html/database/
+COPY docker/   /var/www/html/docker/
+COPY --from=frontend /build/public/app /var/www/html/public/app
 
 # Permisos de escritura para las imagenes subidas
 RUN set -eux; \
@@ -51,5 +77,5 @@ RUN set -eux; \
     test "${mpms}" = "1"; \
     apache2ctl -t
 
-EXPOSE 80
+EXPOSE 81
 CMD ["/usr/local/bin/entrypoint.sh"]

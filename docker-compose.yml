@@ -15,7 +15,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: pos_libreria
     ports:
-      - "3307:3306"
+      - "3307:3309"
     volumes:
       - ./database/pos_libreria.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
       - db_data:/var/lib/mysql
@@ -32,7 +32,7 @@ services:
         condition: service_healthy
     environment:
       DB_HOST: db
-      DB_PORT: "3306"
+      DB_PORT: "3309"
       DB_NAME: pos_libreria
       DB_USER: root
       DB_PASSWORD: root
@@ -42,7 +42,7 @@ services:
       OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
       OPENWEATHER_CIUDAD: ${OPENWEATHER_CIUDAD:-Guatemala City,GT}
     ports:
-      - "8090:80"
+      - "8091:81"
 
   phpmyadmin:
     image: phpmyadmin:5
@@ -51,10 +51,10 @@ services:
         condition: service_healthy
     environment:
       PMA_HOST: db
-      PMA_PORT: "3306"
+      PMA_PORT: "3309"
       UPLOAD_LIMIT: 64M
     ports:
-      - "8081:80"
+      - "8083:83"
 
 volumes:
   db_data:
