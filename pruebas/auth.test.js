@@ -31,7 +31,7 @@ async function apiPost(path, body) {
   return { status: res.status, data };
 }
 
-describe('Modulo Autenticacion — pruebas de caja negra sobre la API REST', () => {
+describe('Módulo 1 · Autenticación [Caja negra] — pruebas sobre la API REST', () => {
   // ---- CP-LOGIN-001 -------------------------------------------------
   test('CP-LOGIN-001 · Login exitoso con credenciales correctas → 200', async () => {
     const { status, data } = await apiPost('/api/auth/login', {

@@ -123,7 +123,7 @@ frontend en una etapa con Node y copia solo el resultado a la imagen PHP.
 ├── database/
 │   └── pos_tienda.sql     # Script SQL: estructura + datos de prueba
 ├── docs/                    # Manual, diagrama ER, guía de despliegue
-├── pruebas/                 # Pruebas de caja negra de la API (Jest)
+├── pruebas/                 # Pruebas de la API con Jest: auth, productos, ganancias (caja negra/blanca/gris)
 ├── Dockerfile               # Build de React (Node) + PHP 8.3 + Apache
 └── docker-compose.yml       # Entorno local (web + MySQL + phpMyAdmin)
 ```
