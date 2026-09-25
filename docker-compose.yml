@@ -5,8 +5,12 @@
 #    - phpmyadmin:  administrador web de la base de datos
 #
 #  Uso:         docker compose up --build
-#  App:         http://localhost:8090
-#  phpMyAdmin:  http://localhost:8081  (usuario: root / clave: root)
+#  App:         http://localhost:8091
+#  phpMyAdmin:  http://localhost:8083  (usuario: root / clave: root)
+#  MySQL:       localhost:3309 desde su maquina
+#
+#  En "puerto_maquina:puerto_contenedor" solo se cambia el de la izquierda:
+#  dentro de los contenedores MySQL escucha en 3306 y Apache en 80.
 # =====================================================================
 services:
   db:
@@ -15,7 +19,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: pos_libreria
     ports:
-      - "3307:3309"
+      - "3309:3306"
     volumes:
       - ./database/pos_libreria.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
       - db_data:/var/lib/mysql
@@ -32,7 +36,7 @@ services:
         condition: service_healthy
     environment:
       DB_HOST: db
-      DB_PORT: "3309"
+      DB_PORT: "3306"
       DB_NAME: pos_libreria
       DB_USER: root
       DB_PASSWORD: root
@@ -42,7 +46,7 @@ services:
       OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
       OPENWEATHER_CIUDAD: ${OPENWEATHER_CIUDAD:-Guatemala City,GT}
     ports:
-      - "8091:81"
+      - "8091:80"
 
   phpmyadmin:
     image: phpmyadmin:5
@@ -51,10 +55,10 @@ services:
         condition: service_healthy
     environment:
       PMA_HOST: db
-      PMA_PORT: "3309"
+      PMA_PORT: "3306"
       UPLOAD_LIMIT: 64M
     ports:
-      - "8083:83"
+      - "8083:80"
 
 volumes:
   db_data:

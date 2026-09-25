@@ -3,7 +3,7 @@
  *
  *   docker compose up -d
  *   npm install puppeteer-core
- *   node docs/capturas/generar.mjs [url]        (por defecto http://localhost:8090)
+ *   node docs/capturas/generar.mjs [url]        (por defecto http://localhost:8091)
  *
  * Si se define OPENWEATHER_API_KEY en el contenedor, la captura del dashboard
  * saldrá con el clima real; si no, con el aviso de "clima no disponible".
@@ -12,7 +12,7 @@ import puppeteer from 'puppeteer-core';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const BASE = process.argv[2] || 'http://localhost:8090';
+const BASE = process.argv[2] || 'http://localhost:8091';
 const DIR  = dirname(fileURLToPath(import.meta.url));
 const CHROME = process.env.CHROME_PATH ||
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';

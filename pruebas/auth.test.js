@@ -6,14 +6,14 @@
  *  contra la API REST corriendo (POST /api/auth/login y /api/auth/register).
  *
  *  Requisito: la app debe estar levantada (docker compose up) en:
- *      BASE_URL  (por defecto http://localhost:8090)
+ *      BASE_URL  (por defecto http://localhost:8091)
  *
  *  Uso:
  *      cd pruebas && npm install && npm test
- *      BASE_URL=http://localhost:8090 npm test
+ *      BASE_URL=http://localhost:8091 npm test
  * ===================================================================== */
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8090';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:8091';
 
 /** POST JSON a la API y devuelve { status, data }. */
 async function apiPost(path, body) {

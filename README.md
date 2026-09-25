@@ -32,7 +32,7 @@ Requisitos: Docker + Docker Compose.
 docker compose up --build
 ```
 
-Luego abrir <http://localhost:8090>
+Luego abrir <http://localhost:8091>
 
 La base de datos se crea y se llena automáticamente con `database/pos_libreria.sql`.
 
@@ -78,9 +78,9 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
-Vite reenvía `/api` y `/uploads` al contenedor (`http://localhost:8090`), así
+Vite reenvía `/api` y `/uploads` al contenedor (`http://localhost:8091`), así
 que la cookie de sesión funciona igual que en producción. Si el contenedor
-usa otro puerto: `API_URL=http://localhost:8091 npm run dev`.
+usa otro puerto: `API_URL=http://localhost:9000 npm run dev`.
 
 `npm run build` genera `public/app/`, que es lo que sirve Apache. No hace
 falta hacerlo a mano para Docker ni Railway: el `Dockerfile` compila el
@@ -238,14 +238,14 @@ servicio externo falla o rechaza la consulta.
 
 **Login**
 ```bash
-curl -c cookies.txt -X POST http://localhost:8090/api/auth/login \
+curl -c cookies.txt -X POST http://localhost:8091/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"correo":"admin@libreria.com","password":"admin123"}'
 ```
 
 **Registrar una venta**
 ```bash
-curl -b cookies.txt -X POST http://localhost:8090/api/ventas \
+curl -b cookies.txt -X POST http://localhost:8091/api/ventas \
   -H "Content-Type: application/json" \
   -d '{
         "id_cliente": 2,
