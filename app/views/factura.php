@@ -7,7 +7,7 @@
 $config = require __DIR__ . '/../config.php';
 $empresa = $config['app']['empresa'];
 
-$qrData = "Factura POS Libreria\n"
+$qrData = "Factura POS Tienda\n"
         . "No: " . str_pad((string) $venta['id'], 6, '0', STR_PAD_LEFT) . "\n"
         . "Fecha: " . $venta['fecha'] . "\n"
         . "Total: Q " . number_format($venta['total'], 2) . "\n"

@@ -42,10 +42,10 @@ $config = [
         'password' => env('MYSQLPASSWORD', env('DB_PASSWORD', 'root')),
     ],
     'app' => [
-        'name'     => 'POS Libreria Escolar',
+        'name'     => 'POS Tienda',
         'iva'      => 0.12,          // IVA 12%
         'moneda'   => 'GTQ',
-        'empresa'  => 'Libreria y Papeleria El Estudiante',
+        'empresa'  => 'Tienda El Estudiante',
         // API externa de codigos QR (funcionalidad visible en cada factura)
         'qr_api'   => 'https://api.qrserver.com/v1/create-qr-code/',
     ],

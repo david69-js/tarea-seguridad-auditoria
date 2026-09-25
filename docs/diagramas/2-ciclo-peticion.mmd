@@ -1,0 +1,17 @@
+flowchart TD
+    A([Llega petición]) --> B[".htaccess → public/index.php"]
+    B --> C["Carga db.php, helpers.php<br/>y todos los controladores"]
+    C --> D["Calcula ruta (path) y método HTTP"]
+    D --> E{"¿POST con<br/>_method PUT/PATCH/DELETE?"}
+    E -->|Sí| F["Sobrescribe el método"]
+    E -->|No| G
+    F --> G["dispatch(method, path)"]
+    G --> H{"¿Coincide<br/>alguna ruta?"}
+
+    H -->|"Ruta web"| I["Controlador web.php"]
+    H -->|"Ruta /api"| J["Controlador de API"]
+    H -->|"No coincide (/api)"| K["json_error 404 / 405"]
+    H -->|"No coincide (web)"| L["Vista errors/404"]
+
+    I --> M["view() renderiza HTML<br/>dentro de layout/main"]
+    J --> N["json_ok / json_error<br/>respuesta JSON"]

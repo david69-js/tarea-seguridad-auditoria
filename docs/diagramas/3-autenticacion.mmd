@@ -1,0 +1,27 @@
+flowchart TD
+    A([Usuario abre la app]) --> B{"¿Sesión activa?<br/>is_logged_in()"}
+    B -->|No| C["/login — formulario"]
+    C --> D["POST /login<br/>correo + password"]
+    D --> E["SELECT usuarios WHERE correo, activo=1"]
+    E --> F{"¿Existe y<br/>password_verify() OK?"}
+    F -->|No| G["Redirige a /login?error=1"]
+    G --> C
+    F -->|Sí| H["session_regenerate_id()<br/>guarda sesión (id, rol...)"]
+    H --> I["Redirige a /dashboard"]
+
+    B -->|Sí| I
+
+    I --> J{"Acción solicitada"}
+    J -->|"Página protegida"| K["require_login()"]
+    J -->|"Endpoint API"| L["require_api_login()"]
+    J -->|"Solo admin<br/>(usuarios, anular venta)"| M["require_api_admin()<br/>is_admin()"]
+
+    K --> N{¿Autenticado?}
+    N -->|No| C
+    N -->|Sí| O["Sirve la página / dato"]
+    L --> P{¿Autenticado?}
+    P -->|No| Q["401 JSON → app.js redirige a /login"]
+    P -->|Sí| O
+    M --> R{¿Es admin?}
+    R -->|No| S["403 — Acceso denegado"]
+    R -->|Sí| O

@@ -1,10 +1,12 @@
 # =====================================================================
 #  Entorno de desarrollo local (equivalente a Railway):
-#    - web:  aplicación PHP + Apache (Dockerfile)
-#    - db:   MySQL 8, carga automáticamente database/pos_libreria.sql
+#    - web:         aplicación PHP + Apache (Dockerfile)
+#    - db:          MySQL 8, carga automáticamente database/pos_libreria.sql
+#    - phpmyadmin:  administrador web de la base de datos
 #
-#  Uso:   docker compose up --build
-#  App:   http://localhost:8080
+#  Uso:         docker compose up --build
+#  App:         http://localhost:8090
+#  phpMyAdmin:  http://localhost:8081  (usuario: root / clave: root)
 # =====================================================================
 services:
   db:
@@ -36,6 +38,18 @@ services:
       DB_PASSWORD: root
     ports:
       - "8090:80"
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_PORT: "3306"
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8081:80"
 
 volumes:
   db_data:

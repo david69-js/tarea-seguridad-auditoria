@@ -1,0 +1,23 @@
+flowchart TD
+    A([Cajero en /pos]) --> B["Agrega productos al carrito<br/>elige cliente, método de pago, descuento"]
+    B --> C["POST /api/ventas (JSON con items)"]
+    C --> D["require_api_login()"]
+    D --> E["BEGIN TRANSACTION"]
+
+    E --> F["Por cada item:<br/>SELECT producto FOR UPDATE"]
+    F --> G{"¿Existe y hay<br/>stock suficiente?"}
+    G -->|No| H["throw → ROLLBACK<br/>422 'Stock insuficiente'"]
+    G -->|Sí| I["Acumula subtotal por línea"]
+
+    I --> J{"¿Descuento ><br/>subtotal?"}
+    J -->|Sí| H
+    J -->|No| K["Calcula:<br/>IVA 12% · total"]
+
+    K --> L["INSERT ventas (cabecera)"]
+    L --> M["INSERT detalle_ventas<br/>+ UPDATE stock = stock - cantidad"]
+    M --> N["INSERT pagos<br/>(genera referencia QR si aplica)"]
+    N --> O["COMMIT"]
+    O --> P["201 → venta completa (JSON)"]
+
+    P --> Q(["Ver factura<br/>GET /ventas/id"])
+    Q --> R["Vista factura.php<br/>+ img QR desde api.qrserver.com"]

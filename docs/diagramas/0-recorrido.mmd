@@ -1,0 +1,14 @@
+flowchart LR
+    A([Inicio]) --> B["Login: correo y contraseña"]
+    B --> C{"¿Credenciales válidas?"}
+    C -->|No| B
+    C -->|Sí| D["Dashboard"]
+
+    D --> E["Crear / gestionar producto<br/>(Inventario)"]
+    E --> F["Registrar venta<br/>(Punto de Venta)"]
+    F --> G{"¿Stock suficiente?"}
+    G -->|No| F
+    G -->|Sí| H["Calcular subtotal, IVA 12% y total"]
+    H --> I["Guardar venta y descontar stock"]
+    I --> J["Generar cotización / factura<br/>con código QR"]
+    J --> K([Fin])

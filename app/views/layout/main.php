@@ -1,7 +1,7 @@
 <?php
 /** Layout principal. Espera: $content, $titulo (opcional). */
 $user = current_user();
-$titulo = $titulo ?? 'POS Libreria';
+$titulo = $titulo ?? 'POS Tienda';
 $actual = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '';
 function nav_active(string $frag, string $actual): string
 {
@@ -13,7 +13,7 @@ function nav_active(string $frag, string $actual): string
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($titulo) ?> · POS Librería</title>
+    <title><?= e($titulo) ?> · POS Tienda</title>
 
     <!-- API externa: Google Fonts (tipografía profesional) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,8 +39,8 @@ function nav_active(string $frag, string $actual): string
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-brand">
-            <i class="bi bi-book-half"></i>
-            <span>POS Librería</span>
+            <i class="bi bi-shop"></i>
+            <span>POS Tienda</span>
         </div>
         <nav class="sidebar-nav">
             <a class="nav-link <?= nav_active('/dashboard', $actual) ?>" href="<?= base_url('/dashboard') ?>">
@@ -51,10 +51,12 @@ function nav_active(string $frag, string $actual): string
                 <i class="bi bi-box-seam"></i> Inventario</a>
             <a class="nav-link <?= nav_active('/ventas', $actual) ?>" href="<?= base_url('/ventas') ?>">
                 <i class="bi bi-receipt"></i> Ventas</a>
+            <?php /* Ocultos temporalmente (solo visual):
             <a class="nav-link <?= nav_active('/clientes', $actual) ?>" href="<?= base_url('/clientes') ?>">
                 <i class="bi bi-people"></i> Clientes</a>
             <a class="nav-link <?= nav_active('/reportes', $actual) ?>" href="<?= base_url('/reportes') ?>">
                 <i class="bi bi-graph-up"></i> Reportes</a>
+            */ ?>
             <?php if (is_admin()): ?>
             <a class="nav-link <?= nav_active('/usuarios', $actual) ?>" href="<?= base_url('/usuarios') ?>">
                 <i class="bi bi-shield-lock"></i> Usuarios</a>
