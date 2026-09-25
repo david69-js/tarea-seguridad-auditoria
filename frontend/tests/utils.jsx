@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from '../lib/auth';
-import { ToastProvider } from '../lib/toast';
+import { AuthProvider, useAuth } from '../src/lib/auth';
+import { ToastProvider } from '../src/lib/toast';
 
 export const ADMIN  = { id: 1, nombre: 'Administrador', correo: 'admin@tienda.com', rol: 'admin' };
 export const CAJERO = { id: 2, nombre: 'Cajero Uno', correo: 'cajero@tienda.com', rol: 'cajero' };

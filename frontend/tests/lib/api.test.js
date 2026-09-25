@@ -1,4 +1,4 @@
-import { api, apiForm } from './api';
+import { api, apiForm } from '../../src/lib/api';
 
 const respuesta = (status, body) => ({ status, json: async () => body });
 

@@ -1,8 +1,8 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Registro from './Registro';
-import Login from './Login';
-import { error, mockApi, ok, renderApp } from '../test/utils';
+import Registro from '../../src/pages/Registro';
+import Login from '../../src/pages/Login';
+import { error, mockApi, ok, renderApp } from '../utils';
 
 async function llenar({ nombre = 'Ana López', correo = 'ana@tienda.com', pass = 'secreto1', pass2 = 'secreto1' } = {}) {
     await userEvent.type(await screen.findByLabelText('Nombre completo'), nombre);

@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Login from './Login';
-import { ADMIN, error, mockApi, ok, renderApp } from '../test/utils';
+import Login from '../../src/pages/Login';
+import { ADMIN, error, mockApi, ok, renderApp } from '../utils';
 
 const Dashboard = () => <h1>Pantalla dashboard</h1>;
 

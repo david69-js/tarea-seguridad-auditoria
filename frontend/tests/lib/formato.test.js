@@ -1,4 +1,4 @@
-import { fechaCorta, fechaISO, folio, money } from './formato';
+import { fechaCorta, fechaISO, folio, money } from '../../src/lib/formato';
 
 describe('formato', () => {
     test('money: formatea en quetzales con 2 decimales', () => {

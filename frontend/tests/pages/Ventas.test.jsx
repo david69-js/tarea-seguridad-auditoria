@@ -1,7 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Ventas from './Ventas';
-import { ADMIN, CAJERO, mockApi, ok, renderApp } from '../test/utils';
+import Ventas from '../../src/pages/Ventas';
+import { ADMIN, CAJERO, mockApi, ok, renderApp } from '../utils';
 
 const VENTAS = [
     { id: 3, fecha: '2026-09-20 10:00:00', subtotal: 216, descuento: 10, total: 206, estado: 'completada', cajero: 'Administrador', cliente: 'Comedor Dona Rosa' },

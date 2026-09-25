@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react';
-import Reportes from './Reportes';
-import { ADMIN, CAJERO, mockApi, ok, renderApp } from '../test/utils';
+import Reportes from '../../src/pages/Reportes';
+import { ADMIN, CAJERO, mockApi, ok, renderApp } from '../utils';
 
 const REPORTE = {
     desde: '2026-09-01', hasta: '2026-09-25',

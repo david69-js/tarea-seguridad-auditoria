@@ -1,7 +1,7 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Pos from './Pos';
-import { CAJERO, error, mockApi, ok, renderApp } from '../test/utils';
+import Pos from '../../src/pages/Pos';
+import { CAJERO, error, mockApi, ok, renderApp } from '../utils';
 
 const PRODUCTOS = [
     { id: 1, codigo: 'BEB-001', nombre: 'Agua Pura 600 ml', precio: 5, stock: 120, stock_bajo: false },

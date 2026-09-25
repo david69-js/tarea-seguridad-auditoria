@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Productos from './Productos';
-import { ADMIN, CAJERO, mockApi, ok, renderApp } from '../test/utils';
+import Productos from '../../src/pages/Productos';
+import { ADMIN, CAJERO, mockApi, ok, renderApp } from '../utils';
 
 const CATEGORIAS = [{ id: 1, nombre: 'Bebidas' }];
 // Lo que la API manda a un admin (con costo) y a un cajero (sin costo).

@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import App from './App';
-import { AuthProvider } from './lib/auth';
-import { ToastProvider } from './lib/toast';
-import { ADMIN, CAJERO, mockApi, ok } from './test/utils';
+import App from '../src/App';
+import { AuthProvider } from '../src/lib/auth';
+import { ToastProvider } from '../src/lib/toast';
+import { ADMIN, CAJERO, mockApi, ok } from './utils';
 
 // Chart.js necesita <canvas>, que jsdom no dibuja: las gráficas se reemplazan.
 jest.mock('react-chartjs-2', () => ({ Line: () => null, Bar: () => null, Doughnut: () => null }));
