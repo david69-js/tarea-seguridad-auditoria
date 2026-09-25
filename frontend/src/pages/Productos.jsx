@@ -7,9 +7,11 @@ import { useToast } from '../lib/toast';
 import FilaVacia from '../components/FilaVacia';
 import Modal from '../components/Modal';
 
-/* Inventario de productos: CRUD, búsqueda, alerta de stock, imagen. */
+/* Inventario de productos: CRUD, búsqueda, alerta de stock, imagen y
+   ganancia por producto (precio de venta − precio de compra). El costo y la
+   ganancia solo los envía la API a administradores. */
 
-const VACIO = { id: '', codigo: '', nombre: '', descripcion: '', precio: '', stock: '0', id_categoria: '' };
+const VACIO = { id: '', codigo: '', nombre: '', descripcion: '', precio_compra: '', precio: '', stock: '0', id_categoria: '' };
 
 export default function Productos() {
     const { esAdmin } = useAuth();
@@ -52,7 +54,7 @@ export default function Productos() {
         const p = res.data;
         setForm({
             id: p.id, codigo: p.codigo, nombre: p.nombre, descripcion: p.descripcion || '',
-            precio: String(p.precio), stock: String(p.stock), id_categoria: p.id_categoria ? String(p.id_categoria) : '',
+            precio_compra: String(p.precio_compra ?? ''), precio: String(p.precio), stock: String(p.stock), id_categoria: p.id_categoria ? String(p.id_categoria) : '',
         });
         setImagen(null);
         setModal(true);
@@ -68,7 +70,7 @@ export default function Productos() {
     const guardar = async () => {
         // multipart para permitir la imagen; el backend acepta PUT vía _method
         const fd = new FormData();
-        for (const campo of ['codigo', 'nombre', 'descripcion', 'precio', 'stock', 'id_categoria']) {
+        for (const campo of ['codigo', 'nombre', 'descripcion', 'precio_compra', 'precio', 'stock', 'id_categoria']) {
             fd.append(campo, form[campo]);
         }
         if (imagen) fd.append('imagen', imagen);
@@ -81,12 +83,20 @@ export default function Productos() {
         if (res.ok) { setModal(false); cargar(); }
     };
 
+    const columnas = esAdmin ? 9 : 7;
     const campo = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+    // Vista previa de la ganancia mientras se llenan los precios
+    const gananciaForm = form.precio !== '' && form.precio_compra !== ''
+        ? parseFloat(form.precio) - parseFloat(form.precio_compra) : null;
 
     return (
         <>
             <div className="page-head">
-                <p className="page-sub">Catálogo de la tienda. Los productos con menos de 5 unidades se marcan en rojo.</p>
+                <p className="page-sub">
+                    Catálogo de la tienda. Los productos con menos de 5 unidades se marcan en rojo.
+                    {esAdmin && ' La ganancia es el precio de venta menos el precio de compra.'}
+                </p>
                 <div className="toolbar">
                     <label className="visually-hidden" htmlFor="buscador">Buscar producto por nombre o código</label>
                     <div className="input-group" style={{ maxWidth: 320 }}>
@@ -127,15 +137,17 @@ export default function Productos() {
                                 <th scope="col">Código</th>
                                 <th scope="col">Producto</th>
                                 <th scope="col">Categoría</th>
-                                <th scope="col" className="text-end">Precio</th>
+                                {esAdmin && <th scope="col" className="text-end">Compra</th>}
+                                <th scope="col" className="text-end">{esAdmin ? 'Venta' : 'Precio'}</th>
+                                {esAdmin && <th scope="col" className="text-end">Ganancia</th>}
                                 <th scope="col" className="text-center">Stock</th>
                                 <th scope="col" className="text-end">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {productos === null && <FilaVacia columnas={7}>Cargando inventario…</FilaVacia>}
+                            {productos === null && <FilaVacia columnas={columnas}>Cargando inventario…</FilaVacia>}
                             {productos?.length === 0 && (
-                                <FilaVacia columnas={7} icono="bi-inbox">No hay productos que coincidan con la búsqueda.</FilaVacia>
+                                <FilaVacia columnas={columnas} icono="bi-inbox">No hay productos que coincidan con la búsqueda.</FilaVacia>
                             )}
                             {productos?.map((p) => (
                                 <tr key={p.id}>
@@ -150,7 +162,16 @@ export default function Productos() {
                                         {p.descripcion && <div className="prod-desc">{p.descripcion}</div>}
                                     </td>
                                     <td>{p.categoria || '—'}</td>
+                                    {esAdmin && <td className="text-end text-muted">{money(p.precio_compra)}</td>}
                                     <td className="text-end fw-semibold">{money(p.precio)}</td>
+                                    {esAdmin && (
+                                        <td className="text-end">
+                                            <span className={p.ganancia > 0 ? 'text-success fw-semibold' : 'text-danger fw-semibold'}>
+                                                {money(p.ganancia)}
+                                            </span>
+                                            <br /><small className="text-muted">{p.margen}%</small>
+                                        </td>
+                                    )}
                                     <td className="text-center">
                                         {p.stock_bajo
                                             ? <><span className="pill pill-danger"><i className="bi bi-exclamation-triangle" aria-hidden="true"></i> {p.stock}</span>
@@ -203,16 +224,29 @@ export default function Productos() {
                                   value={form.descripcion} onChange={campo}></textarea>
                     </div>
                     <div className="col-md-4">
-                        <label className="form-label" htmlFor="prodPrecio">Precio (Q) *</label>
+                        <label className="form-label" htmlFor="prodCompra">Precio de compra (Q) *</label>
+                        <input name="precio_compra" id="prodCompra" type="number" step="0.01" min="0" className="form-control" required
+                               value={form.precio_compra} onChange={campo} />
+                    </div>
+                    <div className="col-md-4">
+                        <label className="form-label" htmlFor="prodPrecio">Precio de venta (Q) *</label>
                         <input name="precio" id="prodPrecio" type="number" step="0.01" min="0" className="form-control" required
                                value={form.precio} onChange={campo} />
                     </div>
                     <div className="col-md-4">
+                        <span className="form-label d-block">Ganancia por unidad</span>
+                        <div className={`form-control-plaintext fw-semibold ${gananciaForm === null ? 'text-muted' : gananciaForm > 0 ? 'text-success' : 'text-danger'}`}
+                             aria-live="polite">
+                            {gananciaForm === null ? '—' : money(gananciaForm)}
+                            {gananciaForm !== null && gananciaForm <= 0 && <small className="d-block">Se vende sin ganancia</small>}
+                        </div>
+                    </div>
+                    <div className="col-md-6">
                         <label className="form-label" htmlFor="prodStock">Stock</label>
                         <input name="stock" id="prodStock" type="number" min="0" className="form-control"
                                value={form.stock} onChange={campo} />
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-6">
                         <label className="form-label" htmlFor="prodCategoria">Categoría</label>
                         <select name="id_categoria" id="prodCategoria" className="form-select"
                                 value={form.id_categoria} onChange={campo}>

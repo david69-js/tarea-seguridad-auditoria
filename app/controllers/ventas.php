@@ -74,7 +74,7 @@ function api_ventas_create(): void
         // 1) Validar productos, stock y calcular subtotal
         $subtotal = 0.0;
         $lineas = [];
-        $stmtProd = $pdo->prepare('SELECT id, nombre, precio, stock FROM productos WHERE id = ? AND activo = 1 FOR UPDATE');
+        $stmtProd = $pdo->prepare('SELECT id, nombre, precio, precio_compra, stock FROM productos WHERE id = ? AND activo = 1 FOR UPDATE');
 
         foreach ($items as $item) {
             $idProd   = (int) ($item['id_producto'] ?? 0);
@@ -96,6 +96,9 @@ function api_ventas_create(): void
                 'id_producto'     => $idProd,
                 'cantidad'        => $cantidad,
                 'precio_unitario' => (float) $prod['precio'],
+                // Se guarda el costo del momento: si luego cambia el precio de
+                // compra, la ganancia de esta venta no se altera.
+                'costo_unitario'  => (float) $prod['precio_compra'],
                 'subtotal'        => $lineaSub,
             ];
         }
@@ -117,12 +120,12 @@ function api_ventas_create(): void
 
         // 3) Insertar detalle y descontar stock
         $stmtDet   = $pdo->prepare(
-            'INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario, subtotal)
-             VALUES (?, ?, ?, ?, ?)'
+            'INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario, costo_unitario, subtotal)
+             VALUES (?, ?, ?, ?, ?, ?)'
         );
         $stmtStock = $pdo->prepare('UPDATE productos SET stock = stock - ? WHERE id = ?');
         foreach ($lineas as $l) {
-            $stmtDet->execute([$idVenta, $l['id_producto'], $l['cantidad'], $l['precio_unitario'], $l['subtotal']]);
+            $stmtDet->execute([$idVenta, $l['id_producto'], $l['cantidad'], $l['precio_unitario'], $l['costo_unitario'], $l['subtotal']]);
             $stmtStock->execute([$l['cantidad'], $l['id_producto']]);
         }
 
@@ -206,6 +209,14 @@ function obtener_venta_completa(int $id): ?array
     $venta['descuento'] = (float) $venta['descuento'];
     $venta['total']     = (float) $venta['total'];
     $venta['detalle']   = $det->fetchAll();
+
+    // El costo es informacion del dueno: solo lo ve un admin.
+    if (!is_admin()) {
+        foreach ($venta['detalle'] as &$linea) {
+            unset($linea['costo_unitario']);
+        }
+        unset($linea);
+    }
 
     return $venta;
 }

@@ -160,6 +160,7 @@ route('POST', '/api/ventas/{id}/anular', 'api_ventas_anular');
 route('GET', '/api/reportes/dashboard',           'api_reportes_dashboard');
 route('GET', '/api/reportes/ventas',              'api_reportes_ventas');
 route('GET', '/api/reportes/productos-vendidos',  'api_reportes_productos_vendidos');
+route('GET', '/api/reportes/rentabilidad',        'api_reportes_rentabilidad');   // solo admin
 
 // --- Clima (API externa: OpenWeatherMap) ---
 route('GET', '/api/clima', 'api_clima');

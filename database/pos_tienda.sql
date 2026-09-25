@@ -55,7 +55,8 @@ CREATE TABLE productos (
     codigo        VARCHAR(40)   NOT NULL UNIQUE,
     nombre        VARCHAR(150)  NOT NULL,
     descripcion   TEXT          DEFAULT NULL,
-    precio        DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    precio_compra DECIMAL(10,2) NOT NULL DEFAULT 0.00,   -- costo para la tienda
+    precio        DECIMAL(10,2) NOT NULL DEFAULT 0.00,   -- precio de venta (final)
     stock         INT           NOT NULL DEFAULT 0,
     id_categoria  INT           DEFAULT NULL,
     imagen_url    VARCHAR(255)  DEFAULT NULL,
@@ -108,7 +109,8 @@ CREATE TABLE detalle_ventas (
     id_venta         INT           NOT NULL,
     id_producto      INT           NOT NULL,
     cantidad         INT           NOT NULL DEFAULT 1,
-    precio_unitario  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    precio_unitario  DECIMAL(10,2) NOT NULL DEFAULT 0.00,   -- precio de venta al momento
+    costo_unitario   DECIMAL(10,2) NOT NULL DEFAULT 0.00,   -- precio de compra al momento
     subtotal         DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     CONSTRAINT fk_detalle_venta
         FOREIGN KEY (id_venta) REFERENCES ventas(id)
@@ -151,30 +153,30 @@ INSERT INTO categorias (nombre, descripcion) VALUES
 ('Limpieza del Hogar', 'Detergentes, cloro y jabones para el hogar'),
 ('Cuidado Personal',   'Papel higienico, jabon y cuidado dental');
 
--- Productos (precios en GTQ)
-INSERT INTO productos (codigo, nombre, descripcion, precio, stock, id_categoria, imagen_url) VALUES
-('BEB-001', 'Agua Pura 600 ml',                 'Botella de agua purificada',              5.00,  120, 1, NULL),
-('BEB-002', 'Gaseosa Cola 1.5 L',               'Bebida gaseosa sabor cola',               14.00, 60,  1, NULL),
-('BEB-003', 'Jugo de Naranja 1 L',              'Jugo de naranja pasteurizado',            16.50, 35,  1, NULL),
-('GRA-001', 'Frijol Negro 1 lb',                'Frijol negro seleccionado',               9.00,  90,  2, NULL),
-('GRA-002', 'Arroz Blanco 1 lb',                'Arroz blanco grano largo',                6.50,  110, 2, NULL),
-('GRA-003', 'Azucar Blanca 5 lb',               'Bolsa de azucar refinada',                24.00, 40,  2, NULL),
-('GRA-004', 'Harina de Maiz 1 kg',              'Harina de maiz nixtamalizado',            12.00, 3,   2, NULL),
-('ABA-001', 'Aceite Vegetal 1 L',               'Aceite vegetal para cocinar',             28.00, 30,  3, NULL),
-('ABA-002', 'Pasta Spaghetti 200 g',            'Pasta de trigo tipo spaghetti',           4.50,  80,  3, NULL),
-('ABA-003', 'Frijoles Volteados en Lata 400 g', 'Frijol negro volteado listo para servir', 11.00, 45,  3, NULL),
-('ABA-004', 'Sal Yodada 1 kg',                  'Sal de mesa yodada',                      4.00,  50,  3, NULL),
-('LAC-001', 'Leche Entera 1 L',                 'Leche entera ultrapasteurizada',          13.50, 24,  4, NULL),
-('LAC-002', 'Huevos (carton 30)',               'Carton de 30 huevos',                     42.00, 4,   4, NULL),
-('LAC-003', 'Queso Fresco 1 lb',                'Queso fresco artesanal',                  30.00, 12,  4, NULL),
-('SNA-001', 'Galletas de Vainilla (paq 6)',     'Paquete de 6 galletas de vainilla',       10.00, 70,  5, NULL),
-('SNA-002', 'Papalinas Clasicas 45 g',          'Papas fritas sabor natural',              5.50,  85,  5, NULL),
-('SNA-003', 'Chocolate en Barra 50 g',          'Barra de chocolate con leche',            8.00,  55,  5, NULL),
-('LIM-001', 'Detergente en Polvo 1 kg',         'Detergente para ropa',                    26.00, 28,  6, NULL),
-('LIM-002', 'Jabon para Trastos 500 g',         'Jabon en pasta para trastos',             12.50, 36,  6, NULL),
-('LIM-003', 'Cloro 1 L',                        'Blanqueador desinfectante',               9.50,  2,   6, NULL),
-('CUI-001', 'Papel Higienico (paq 4)',          'Paquete de 4 rollos doble hoja',          18.00, 48,  7, NULL),
-('CUI-002', 'Pasta Dental 100 ml',              'Crema dental con fluor',                  15.00, 33,  7, NULL);
+-- Productos (precio de compra y de venta en GTQ)
+INSERT INTO productos (codigo, nombre, descripcion, precio_compra, precio, stock, id_categoria, imagen_url) VALUES
+('BEB-001', 'Agua Pura 600 ml',                 'Botella de agua purificada',              3.25,  5.00,  120, 1, NULL),
+('BEB-002', 'Gaseosa Cola 1.5 L',               'Bebida gaseosa sabor cola',               10.50, 14.00, 60,  1, NULL),
+('BEB-003', 'Jugo de Naranja 1 L',              'Jugo de naranja pasteurizado',            12.00, 16.50, 35,  1, NULL),
+('GRA-001', 'Frijol Negro 1 lb',                'Frijol negro seleccionado',               7.25,  9.00,  90,  2, NULL),
+('GRA-002', 'Arroz Blanco 1 lb',                'Arroz blanco grano largo',                5.40,  6.50,  110, 2, NULL),
+('GRA-003', 'Azucar Blanca 5 lb',               'Bolsa de azucar refinada',                20.50, 24.00, 40,  2, NULL),
+('GRA-004', 'Harina de Maiz 1 kg',              'Harina de maiz nixtamalizado',            9.50,  12.00, 3,   2, NULL),
+('ABA-001', 'Aceite Vegetal 1 L',               'Aceite vegetal para cocinar',             23.00, 28.00, 30,  3, NULL),
+('ABA-002', 'Pasta Spaghetti 200 g',            'Pasta de trigo tipo spaghetti',           3.00,  4.50,  80,  3, NULL),
+('ABA-003', 'Frijoles Volteados en Lata 400 g', 'Frijol negro volteado listo para servir', 8.00,  11.00, 45,  3, NULL),
+('ABA-004', 'Sal Yodada 1 kg',                  'Sal de mesa yodada',                      2.75,  4.00,  50,  3, NULL),
+('LAC-001', 'Leche Entera 1 L',                 'Leche entera ultrapasteurizada',          11.25, 13.50, 24,  4, NULL),
+('LAC-002', 'Huevos (carton 30)',               'Carton de 30 huevos',                     36.00, 42.00, 4,   4, NULL),
+('LAC-003', 'Queso Fresco 1 lb',                'Queso fresco artesanal',                  22.00, 30.00, 12,  4, NULL),
+('SNA-001', 'Galletas de Vainilla (paq 6)',     'Paquete de 6 galletas de vainilla',       6.50,  10.00, 70,  5, NULL),
+('SNA-002', 'Papalinas Clasicas 45 g',          'Papas fritas sabor natural',              3.50,  5.50,  85,  5, NULL),
+('SNA-003', 'Chocolate en Barra 50 g',          'Barra de chocolate con leche',            5.00,  8.00,  55,  5, NULL),
+('LIM-001', 'Detergente en Polvo 1 kg',         'Detergente para ropa',                    20.00, 26.00, 28,  6, NULL),
+('LIM-002', 'Jabon para Trastos 500 g',         'Jabon en pasta para trastos',             9.00,  12.50, 36,  6, NULL),
+('LIM-003', 'Cloro 1 L',                        'Blanqueador desinfectante',               6.25,  9.50,  2,   6, NULL),
+('CUI-001', 'Papel Higienico (paq 4)',          'Paquete de 4 rollos doble hoja',          14.00, 18.00, 48,  7, NULL),
+('CUI-002', 'Pasta Dental 100 ml',              'Crema dental con fluor',                  10.50, 15.00, 33,  7, NULL);
 
 -- Clientes
 INSERT INTO clientes (nombre, correo, telefono, direccion) VALUES
@@ -193,24 +195,24 @@ INSERT INTO ventas (id_usuario, id_cliente, fecha, subtotal, descuento, total, e
 (1, 2, NOW(),                            33.50,  0.00,  33.50,  'completada');
 
 -- Detalle de las ventas de ejemplo (cada linea coincide con su cabecera)
-INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario, subtotal) VALUES
+INSERT INTO detalle_ventas (id_venta, id_producto, cantidad, precio_unitario, costo_unitario, subtotal) VALUES
 -- Venta 1 (frijol + arroz)
-(1, 4,  2, 9.00,  18.00),
-(1, 5,  2, 6.50,  13.00),
+(1, 4,  2, 9.00,  7.25,  18.00),
+(1, 5,  2, 6.50,  5.40,  13.00),
 -- Venta 2 (aceite)
-(2, 8,  1, 28.00, 28.00),
+(2, 8,  1, 28.00, 23.00, 28.00),
 -- Venta 3 (Comedor: huevos + azucar + aceite, con descuento)
-(3, 13, 2, 42.00, 84.00),
-(3, 6,  2, 24.00, 48.00),
-(3, 8,  3, 28.00, 84.00),
+(3, 13, 2, 42.00, 36.00, 84.00),
+(3, 6,  2, 24.00, 20.50, 48.00),
+(3, 8,  3, 28.00, 23.00, 84.00),
 -- Venta 4 (detergente)
-(4, 18, 1, 26.00, 26.00),
+(4, 18, 1, 26.00, 20.00, 26.00),
 -- Venta 5 (leche + queso)
-(5, 12, 2, 13.50, 27.00),
-(5, 14, 1, 30.00, 30.00),
+(5, 12, 2, 13.50, 11.25, 27.00),
+(5, 14, 1, 30.00, 22.00, 30.00),
 -- Venta 6 (gaseosas + papalinas)
-(6, 2,  2, 14.00, 28.00),
-(6, 16, 1, 5.50,  5.50);
+(6, 2,  2, 14.00, 10.50, 28.00),
+(6, 16, 1, 5.50,  3.50,  5.50);
 
 -- Pagos en efectivo (monto = total de la venta)
 INSERT INTO pagos (id_venta, monto, fecha) VALUES

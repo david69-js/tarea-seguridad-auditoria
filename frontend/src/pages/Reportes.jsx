@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { useAuth } from '../lib/auth';
 import { fechaCorta, fechaISO, folio, money } from '../lib/formato';
 import { useToast } from '../lib/toast';
 import FilaVacia from '../components/FilaVacia';
 import Kpi from '../components/Kpi';
 
-/* Reportes: ventas por rango de fechas + productos más vendidos + imprimir. */
+/* Reportes: ventas por rango de fechas, productos más vendidos y (solo
+   admin) rentabilidad por producto: más y menos rentables del período. */
 
 function primeroDelMes() {
     const hoy = new Date();
@@ -14,6 +16,8 @@ function primeroDelMes() {
 
 export default function Reportes() {
     const toast = useToast();
+    const { esAdmin } = useAuth();
+    const [rentabilidad, setRentabilidad] = useState(null);
     const [desde, setDesde] = useState(primeroDelMes);
     const [hasta, setHasta] = useState(() => fechaISO());
     const [reporte, setReporte] = useState(null);
@@ -28,6 +32,11 @@ export default function Reportes() {
         const res = await api(`/api/reportes/ventas?desde=${desde}&hasta=${hasta}`);
         if (res.ok) setReporte(res.data);
         else toast(res.mensaje, false);
+
+        if (esAdmin) {
+            const ren = await api(`/api/reportes/rentabilidad?desde=${desde}&hasta=${hasta}`);
+            setRentabilidad(ren.ok ? ren.data : null);
+        }
     };
 
     useEffect(() => {
@@ -140,6 +149,88 @@ export default function Reportes() {
                     </div>
                 </div>
             </div>
+
+            {esAdmin && rentabilidad && <Rentabilidad datos={rentabilidad} />}
         </>
+    );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Rentabilidad por producto (solo admin)                             */
+/*  Ganancia por unidad = precio de venta − precio de compra.          */
+/*  Ganancia generada = unidades vendidas × ganancia al momento de     */
+/*  cada venta. Los 3 primeros y los 3 últimos se marcan como más y    */
+/*  menos rentables.                                                   */
+/* ------------------------------------------------------------------ */
+function Rentabilidad({ datos }) {
+    const lista = datos.productos;
+    const top = 3;
+
+    return (
+        <section className="mt-4" aria-labelledby="tituloRentabilidad">
+            <h2 className="h6 text-muted mb-2" id="tituloRentabilidad">
+                Rentabilidad por producto · del {datos.desde} al {datos.hasta}
+            </h2>
+
+            <div className="row g-3 mb-3">
+                <div className="col-12 col-md-4">
+                    <Kpi tono="success" icono="bi-graph-up-arrow" valor={money(datos.ganancia_bruta)}>Ganancia bruta</Kpi>
+                </div>
+                <div className="col-6 col-md-4">
+                    <Kpi tono="warning" icono="bi-tag" valor={`− ${money(datos.descuentos)}`}>Descuentos</Kpi>
+                </div>
+                <div className="col-6 col-md-4">
+                    <Kpi tono="primary" icono="bi-piggy-bank" valor={money(datos.ganancia_neta)}>Ganancia neta</Kpi>
+                </div>
+            </div>
+
+            <div className="card panel">
+                <div className="card-header"><i className="bi bi-bar-chart-steps" aria-hidden="true"></i> Productos más y menos rentables</div>
+                <div className="table-responsive">
+                    <table className="table table-sm table-hover align-middle mb-0">
+                        <caption className="visually-hidden">Productos ordenados por ganancia generada en el período</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Producto</th>
+                                <th scope="col" className="text-end">Compra</th>
+                                <th scope="col" className="text-end">Venta</th>
+                                <th scope="col" className="text-end">Ganancia / u.</th>
+                                <th scope="col" className="text-center">Uds. vendidas</th>
+                                <th scope="col" className="text-end">Ganancia generada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {lista.length === 0 && <FilaVacia columnas={7} icono="bi-box">No hay productos activos.</FilaVacia>}
+                            {lista.map((p, i) => {
+                                const mas = i < top && p.ganancia_total > 0;
+                                const menos = i >= lista.length - top;
+                                return (
+                                    <tr key={p.id}>
+                                        <td className="text-muted">{i + 1}</td>
+                                        <td>
+                                            {p.nombre}
+                                            {mas && <span className="pill pill-success ms-2">Más rentable</span>}
+                                            {menos && <span className="pill pill-danger ms-2">Menos rentable</span>}
+                                            <br /><small className="text-muted">{p.categoria || '—'}</small>
+                                        </td>
+                                        <td className="text-end text-muted">{money(p.precio_compra)}</td>
+                                        <td className="text-end">{money(p.precio)}</td>
+                                        <td className="text-end">{money(p.ganancia)} <small className="text-muted">({p.margen}%)</small></td>
+                                        <td className="text-center">{p.unidades}</td>
+                                        <td className={`text-end fw-semibold ${p.ganancia_total > 0 ? 'text-success' : 'text-muted'}`}>
+                                            {money(p.ganancia_total)}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p className="form-hint mt-2">
+                La ganancia por producto es bruta; los descuentos se aplican a la venta completa y se restan en la ganancia neta.
+            </p>
+        </section>
     );
 }

@@ -126,3 +126,68 @@ function api_reportes_productos_vendidos(): void
     )->fetchAll();
     json_ok($rows, 'Productos mas vendidos.');
 }
+
+/**
+ * GET /api/reportes/rentabilidad?desde=YYYY-MM-DD&hasta=YYYY-MM-DD  (solo admin)
+ * Rentabilidad por producto: ganancia unitaria actual (precio de venta -
+ * precio de compra) y ganancia generada por las ventas del periodo, calculada
+ * con el costo guardado en cada linea de venta. Incluye los productos que no
+ * se vendieron (ganancia 0), para poder ver tambien los menos rentables.
+ *
+ * La ganancia por producto es bruta: los descuentos se aplican a la venta
+ * completa, no a un producto, asi que se restan al final (ganancia_neta).
+ */
+function api_reportes_rentabilidad(): void
+{
+    require_api_admin();
+    $desde = $_GET['desde'] ?? date('Y-m-01');
+    $hasta = $_GET['hasta'] ?? date('Y-m-d');
+
+    $stmt = db()->prepare(
+        "SELECT p.id, p.codigo, p.nombre, c.nombre AS categoria,
+                p.precio_compra, p.precio,
+                COALESCE(SUM(d.cantidad), 0) AS unidades,
+                COALESCE(SUM(d.subtotal), 0) AS ingresos,
+                COALESCE(SUM(d.cantidad * (d.precio_unitario - d.costo_unitario)), 0) AS ganancia_total
+         FROM productos p
+         LEFT JOIN categorias c ON c.id = p.id_categoria
+         LEFT JOIN (
+             SELECT dv.* FROM detalle_ventas dv
+             JOIN ventas v ON v.id = dv.id_venta
+             WHERE v.estado = 'completada' AND DATE(v.fecha) BETWEEN ? AND ?
+         ) d ON d.id_producto = p.id
+         WHERE p.activo = 1
+         GROUP BY p.id, p.codigo, p.nombre, c.nombre, p.precio_compra, p.precio
+         ORDER BY ganancia_total DESC, (p.precio - p.precio_compra) DESC"
+    );
+    $stmt->execute([$desde, $hasta]);
+
+    $rows = array_map(static function (array $r): array {
+        $r['id']             = (int) $r['id'];
+        $r['precio_compra']  = (float) $r['precio_compra'];
+        $r['precio']         = (float) $r['precio'];
+        $r['ganancia']       = round($r['precio'] - $r['precio_compra'], 2);
+        $r['margen']         = $r['precio'] > 0 ? round($r['ganancia'] / $r['precio'] * 100, 1) : 0.0;
+        $r['unidades']       = (int) $r['unidades'];
+        $r['ingresos']       = round((float) $r['ingresos'], 2);
+        $r['ganancia_total'] = round((float) $r['ganancia_total'], 2);
+        return $r;
+    }, $stmt->fetchAll());
+
+    $desc = db()->prepare(
+        "SELECT COALESCE(SUM(descuento), 0) FROM ventas
+         WHERE estado = 'completada' AND DATE(fecha) BETWEEN ? AND ?"
+    );
+    $desc->execute([$desde, $hasta]);
+    $descuentos = round((float) $desc->fetchColumn(), 2);
+    $bruta      = round(array_sum(array_column($rows, 'ganancia_total')), 2);
+
+    json_ok([
+        'desde'          => $desde,
+        'hasta'          => $hasta,
+        'ganancia_bruta' => $bruta,
+        'descuentos'     => $descuentos,
+        'ganancia_neta'  => round($bruta - $descuentos, 2),
+        'productos'      => $rows,
+    ], 'Rentabilidad por producto.');
+}
