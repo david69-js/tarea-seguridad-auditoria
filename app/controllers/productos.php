@@ -1,12 +1,50 @@
 <?php
 /**
  * Controlador de Productos / Inventario (API REST) - CRUD completo.
- * Incluye busqueda, alerta de stock bajo y carga de imagen al servidor.
+ * Incluye busqueda, alerta de stock bajo, carga de imagen al servidor y
+ * ganancia por producto (precio de venta - precio de compra).
+ *
+ * El precio de compra y la ganancia son informacion del dueno: solo se
+ * envian a usuarios con rol admin. Un cajero ve precio de venta y stock.
  */
 
 declare(strict_types=1);
 
 const STOCK_MINIMO = 5;
+
+/**
+ * Normaliza tipos para el JSON y agrega la ganancia. Si quien consulta no es
+ * admin, quita el costo para que no salga del servidor.
+ */
+function producto_json(array $p): array
+{
+    $p['precio'] = (float) $p['precio'];
+    $p['stock']  = (int) $p['stock'];
+    if (array_key_exists('stock_bajo', $p)) {
+        $p['stock_bajo'] = (bool) $p['stock_bajo'];
+    }
+
+    if (is_admin()) {
+        $p['precio_compra'] = (float) $p['precio_compra'];
+        $p['ganancia']      = round($p['precio'] - $p['precio_compra'], 2);
+        // Margen sobre el precio de venta, en porcentaje
+        $p['margen']        = $p['precio'] > 0 ? round($p['ganancia'] / $p['precio'] * 100, 1) : 0.0;
+    } else {
+        unset($p['precio_compra']);
+    }
+    return $p;
+}
+
+/**
+ * Valida un precio recibido: numerico y no negativo. Devuelve el float.
+ */
+function precio_valido($valor, string $campo): float
+{
+    if (!is_numeric($valor) || (float) $valor < 0) {
+        json_error("El {$campo} debe ser un numero mayor o igual a 0.", 422);
+    }
+    return round((float) $valor, 2);
+}
 
 /**
  * GET /api/productos
@@ -44,14 +82,7 @@ function api_productos_list(): void
 
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
-    $rows = $stmt->fetchAll();
-
-    // Normaliza tipos para el JSON
-    foreach ($rows as &$r) {
-        $r['precio']     = (float) $r['precio'];
-        $r['stock']      = (int) $r['stock'];
-        $r['stock_bajo'] = (bool) $r['stock_bajo'];
-    }
+    $rows = array_map('producto_json', $stmt->fetchAll());
     json_ok($rows, 'Listado de productos.');
 }
 
@@ -67,9 +98,7 @@ function api_productos_get(string $id): void
     if (!$row) {
         json_error('Producto no encontrado.', 404);
     }
-    $row['precio'] = (float) $row['precio'];
-    $row['stock']  = (int) $row['stock'];
-    json_ok($row, 'Detalle del producto.');
+    json_ok(producto_json($row), 'Detalle del producto.');
 }
 
 function api_productos_create(): void
@@ -79,26 +108,28 @@ function api_productos_create(): void
 
     $codigo = trim($in['codigo'] ?? '');
     $nombre = trim($in['nombre'] ?? '');
-    $precio = (float) ($in['precio'] ?? 0);
 
     if ($codigo === '' || $nombre === '') {
         json_error('Codigo y nombre son obligatorios.', 422);
     }
-    if ($precio < 0) {
-        json_error('El precio no puede ser negativo.', 422);
+    if (!isset($in['precio_compra'], $in['precio']) || $in['precio_compra'] === '' || $in['precio'] === '') {
+        json_error('El precio de compra y el precio de venta son obligatorios.', 422);
     }
+    $precioCompra = precio_valido($in['precio_compra'], 'precio de compra');
+    $precio       = precio_valido($in['precio'], 'precio de venta');
 
     $imagen = guardar_imagen_producto() ?? ($in['imagen_url'] ?? null);
 
     $stmt = db()->prepare(
-        'INSERT INTO productos (codigo, nombre, descripcion, precio, stock, id_categoria, imagen_url)
-         VALUES (?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO productos (codigo, nombre, descripcion, precio_compra, precio, stock, id_categoria, imagen_url)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     );
     try {
         $stmt->execute([
             $codigo,
             $nombre,
             trim($in['descripcion'] ?? ''),
+            $precioCompra,
             $precio,
             (int) ($in['stock'] ?? 0),
             !empty($in['id_categoria']) ? (int) $in['id_categoria'] : null,
@@ -124,17 +155,23 @@ function api_productos_update(string $id): void
         json_error('Producto no encontrado.', 404);
     }
 
+    $precioCompra = isset($in['precio_compra']) && $in['precio_compra'] !== ''
+        ? precio_valido($in['precio_compra'], 'precio de compra') : $actual['precio_compra'];
+    $precio = isset($in['precio']) && $in['precio'] !== ''
+        ? precio_valido($in['precio'], 'precio de venta') : $actual['precio'];
+
     $imagen = guardar_imagen_producto() ?? ($in['imagen_url'] ?? $actual['imagen_url']);
 
     $stmt = db()->prepare(
-        'UPDATE productos SET codigo = ?, nombre = ?, descripcion = ?, precio = ?,
+        'UPDATE productos SET codigo = ?, nombre = ?, descripcion = ?, precio_compra = ?, precio = ?,
                 stock = ?, id_categoria = ?, imagen_url = ? WHERE id = ?'
     );
     $stmt->execute([
         trim($in['codigo'] ?? $actual['codigo']),
         trim($in['nombre'] ?? $actual['nombre']),
         trim($in['descripcion'] ?? $actual['descripcion']),
-        isset($in['precio']) ? (float) $in['precio'] : $actual['precio'],
+        $precioCompra,
+        $precio,
         isset($in['stock']) ? (int) $in['stock'] : $actual['stock'],
         !empty($in['id_categoria']) ? (int) $in['id_categoria'] : $actual['id_categoria'],
         $imagen,

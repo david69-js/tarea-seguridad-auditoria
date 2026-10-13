@@ -8,7 +8,7 @@ flowchart LR
     E --> F["Registrar venta<br/>(Punto de Venta)"]
     F --> G{"¿Stock suficiente?"}
     G -->|No| F
-    G -->|Sí| H["Calcular subtotal, IVA 12% y total"]
+    G -->|Sí| H["Calcular subtotal, descuento y total<br/>(precios finales, sin IVA)"]
     H --> I["Guardar venta y descontar stock"]
-    I --> J["Generar cotización / factura<br/>con código QR"]
+    I --> J["Cobrar en efectivo<br/>(sin factura)"]
     J --> K([Fin])

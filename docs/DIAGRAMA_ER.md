@@ -1,6 +1,6 @@
 # Diagrama Entidad–Relación (ER)
 
-Base de datos `pos_libreria` — 7 tablas relacionadas y normalizadas.
+Base de datos `pos_tienda` — 7 tablas relacionadas y normalizadas.
 
 > El diagrama está en formato **Mermaid**. Se ve renderizado automáticamente
 > en GitHub. Para exportarlo como imagen para el PDF, puedes pegar el código en
@@ -34,7 +34,8 @@ erDiagram
         varchar codigo UK
         varchar nombre
         text descripcion
-        decimal precio
+        decimal precio_compra
+        decimal precio "precio de venta"
         int stock
         int id_categoria FK
         varchar imagen_url
@@ -44,7 +45,6 @@ erDiagram
     clientes {
         int id PK
         varchar nombre
-        varchar nit
         varchar correo
         varchar telefono
         varchar direccion
@@ -55,10 +55,8 @@ erDiagram
         int id_cliente FK
         timestamp fecha
         decimal subtotal
-        decimal iva
         decimal descuento
         decimal total
-        enum metodo_pago "efectivo | tarjeta | QR"
         enum estado "completada | anulada"
     }
     detalle_ventas {
@@ -67,14 +65,13 @@ erDiagram
         int id_producto FK
         int cantidad
         decimal precio_unitario
+        decimal costo_unitario "precio de compra al vender"
         decimal subtotal
     }
     pagos {
         int id PK
         int id_venta FK
         decimal monto
-        enum metodo "efectivo | tarjeta | QR"
-        varchar referencia_api
         timestamp fecha
     }
 ```
@@ -88,7 +85,7 @@ erDiagram
 | `clientes` → `ventas` | 1 : N | Un cliente puede tener muchas ventas |
 | `ventas` → `detalle_ventas` | 1 : N | Una venta contiene varias líneas de detalle |
 | `productos` → `detalle_ventas` | 1 : N | Un producto aparece en muchos detalles |
-| `ventas` → `pagos` | 1 : N | Una venta tiene uno o más pagos |
+| `ventas` → `pagos` | 1 : N | Registro del cobro en efectivo de cada venta |
 
 ## Normalización
 

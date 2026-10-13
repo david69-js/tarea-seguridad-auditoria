@@ -1,19 +1,19 @@
 /* =====================================================================
  *  Pruebas de caja negra (Jest) — Modulo Autenticacion (Login/Registro)
- *  Proyecto: Sistema POS Web — Tienda El Estudiante (pos_libreria)
+ *  Proyecto: Sistema POS Web — Tienda Bugambilias (pos_tienda)
  *
- *  Ejecuta los 5 casos documentados en "Formato_Casos_Prueba_POS_Web.docx"
+ *  Ejecuta los 5 casos del Módulo 1 documentados en "Plan_Pruebas_y_Formato_Estandar_POS_Web.docx"
  *  contra la API REST corriendo (POST /api/auth/login y /api/auth/register).
  *
  *  Requisito: la app debe estar levantada (docker compose up) en:
- *      BASE_URL  (por defecto http://localhost:8090)
+ *      BASE_URL  (por defecto http://localhost:8091)
  *
  *  Uso:
  *      cd pruebas && npm install && npm test
- *      BASE_URL=http://localhost:8090 npm test
+ *      BASE_URL=http://localhost:8091 npm test
  * ===================================================================== */
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:8090';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:8091';
 
 /** POST JSON a la API y devuelve { status, data }. */
 async function apiPost(path, body) {
@@ -31,22 +31,22 @@ async function apiPost(path, body) {
   return { status: res.status, data };
 }
 
-describe('Modulo Autenticacion — pruebas de caja negra sobre la API REST', () => {
+describe('Módulo 1 · Autenticación [Caja negra] — pruebas sobre la API REST', () => {
   // ---- CP-LOGIN-001 -------------------------------------------------
   test('CP-LOGIN-001 · Login exitoso con credenciales correctas → 200', async () => {
     const { status, data } = await apiPost('/api/auth/login', {
-      correo: 'admin@libreria.com',
+      correo: 'admin@tienda.com',
       password: 'admin123',
     });
     expect(status).toBe(200);
     expect(data.ok).toBe(true);
-    expect(data.data).toMatchObject({ correo: 'admin@libreria.com', rol: 'admin' });
+    expect(data.data).toMatchObject({ correo: 'admin@tienda.com', rol: 'admin' });
   });
 
   // ---- CP-LOGIN-002 -------------------------------------------------
   test('CP-LOGIN-002 · Contrasena incorrecta → 401 Credenciales invalidas', async () => {
     const { status, data } = await apiPost('/api/auth/login', {
-      correo: 'admin@libreria.com',
+      correo: 'admin@tienda.com',
       password: 'clave_incorrecta123',
     });
     expect(status).toBe(401);
@@ -68,7 +68,7 @@ describe('Modulo Autenticacion — pruebas de caja negra sobre la API REST', () 
   // ---- CP-REG-001 ---------------------------------------------------
   test('CP-REG-001 · Registro exitoso de un nuevo usuario → 201', async () => {
     // Correo unico por corrida para que la prueba sea repetible.
-    const correo = `cajero_nuevo_${Date.now()}@libreria.com`;
+    const correo = `cajero_nuevo_${Date.now()}@tienda.com`;
     const { status, data } = await apiPost('/api/auth/register', {
       nombre: 'Cajero Nuevo',
       correo,
@@ -83,7 +83,7 @@ describe('Modulo Autenticacion — pruebas de caja negra sobre la API REST', () 
   test('CP-REG-002 · Correo ya registrado → 409 rechazo', async () => {
     const { status, data } = await apiPost('/api/auth/register', {
       nombre: 'Usuario Prueba 2',
-      correo: 'admin@libreria.com', // ya existe en el seed
+      correo: 'admin@tienda.com', // ya existe en el seed
       password: 'cajero123',
     });
     expect(status).toBe(409);

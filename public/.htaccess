@@ -1,13 +1,31 @@
-# Enruta todas las peticiones al front controller (index.php),
-# excepto archivos y carpetas que existan realmente (assets, uploads).
+# Enrutamiento:
+#   - Archivos y carpetas que existen (frontend compilado, uploads) se
+#     sirven tal cual.
+#   - /api/*  -> index.php (API REST en PHP).
+#   - Cualquier otra ruta (/login, /pos, /ventas/7...) -> la SPA de React,
+#     que decide qué pantalla mostrar.
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # La raiz es un directorio real (public/), asi que se atiende antes
+    RewriteRule ^$ app/index.html [L]
 
     # No reescribir si el archivo o directorio existe fisicamente
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 
-    # Todo lo demas pasa por index.php
-    RewriteRule ^ index.php [L]
+    # API REST
+    RewriteRule ^api(/.*)?$ index.php [L]
+
+    # Frontend (React Router)
+    RewriteRule ^ app/index.html [L]
+</IfModule>
+
+# El index.html de la SPA no se cachea, para que un deploy nuevo se vea al
+# recargar; los JS/CSS de Vite llevan hash en el nombre y si pueden cachearse.
+<IfModule mod_headers.c>
+    <FilesMatch "^index\.html$">
+        Header set Cache-Control "no-cache"
+    </FilesMatch>
 </IfModule>

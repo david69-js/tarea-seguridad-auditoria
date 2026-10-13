@@ -11,7 +11,7 @@ function api_clientes_list(): void
     $q = trim($_GET['q'] ?? '');
     if ($q !== '') {
         $stmt = db()->prepare(
-            'SELECT * FROM clientes WHERE nombre LIKE ? OR nit LIKE ? ORDER BY nombre'
+            'SELECT * FROM clientes WHERE nombre LIKE ? OR telefono LIKE ? ORDER BY nombre'
         );
         $stmt->execute(["%$q%", "%$q%"]);
     } else {
@@ -29,11 +29,10 @@ function api_clientes_create(): void
         json_error('El nombre del cliente es obligatorio.', 422);
     }
     $stmt = db()->prepare(
-        'INSERT INTO clientes (nombre, nit, correo, telefono, direccion) VALUES (?, ?, ?, ?, ?)'
+        'INSERT INTO clientes (nombre, correo, telefono, direccion) VALUES (?, ?, ?, ?)'
     );
     $stmt->execute([
         $nombre,
-        trim($in['nit'] ?? 'CF') ?: 'CF',
         trim($in['correo'] ?? '') ?: null,
         trim($in['telefono'] ?? '') ?: null,
         trim($in['direccion'] ?? '') ?: null,
@@ -50,11 +49,10 @@ function api_clientes_update(string $id): void
         json_error('El nombre del cliente es obligatorio.', 422);
     }
     $stmt = db()->prepare(
-        'UPDATE clientes SET nombre = ?, nit = ?, correo = ?, telefono = ?, direccion = ? WHERE id = ?'
+        'UPDATE clientes SET nombre = ?, correo = ?, telefono = ?, direccion = ? WHERE id = ?'
     );
     $stmt->execute([
         $nombre,
-        trim($in['nit'] ?? 'CF') ?: 'CF',
         trim($in['correo'] ?? '') ?: null,
         trim($in['telefono'] ?? '') ?: null,
         trim($in['direccion'] ?? '') ?: null,

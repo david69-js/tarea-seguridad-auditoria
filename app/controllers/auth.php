@@ -48,6 +48,9 @@ function api_auth_register(): void
     if ($nombre === '' || $correo === '' || strlen($pass) < 6) {
         json_error('Nombre, correo y contrasena (min 6 caracteres) son obligatorios.', 422);
     }
+    if (mb_strlen($nombre) < 3) {
+        json_error('El nombre debe tener al menos 3 caracteres.', 422);
+    }
     if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
         json_error('El correo no tiene un formato valido.', 422);
     }

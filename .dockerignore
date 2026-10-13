@@ -7,3 +7,11 @@ Tarea_POS_Web.docx
 public/uploads/*
 !public/uploads/.gitkeep
 !public/uploads/.htaccess
+
+# El frontend se compila dentro de la etapa "frontend" del Dockerfile, con
+# sus propias dependencias: no se copian las locales ni un build previo.
+frontend/node_modules/
+public/app/
+pruebas/
+*.docx
+*.pdf

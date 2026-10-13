@@ -1,10 +1,10 @@
-# 📚 Sistema de Punto de Venta (POS) Web — Librería y Papelería Escolar
+# 🏪 Sistema de Punto de Venta (POS) Web — Tienda Bugambilias
 
 Proyecto del curso **Seguridad y Auditoría de Sistemas (PHP y MySQL)**
 Universidad Mariano Gálvez de Guatemala · Ciclo 2026
 
-Sistema de Punto de Venta web **full-stack** para una librería/papelería escolar:
-inventario, ventas con carrito e IVA, factura con **código QR**, dashboard con
+Sistema de Punto de Venta web **full-stack** para una tienda familiar (Tienda Bugambilias):
+inventario, ventas al contado en efectivo con carrito y descuento, dashboard con
 gráficas, autenticación con roles y una **API REST propia** documentada.
 
 ---
@@ -13,12 +13,12 @@ gráficas, autenticación con roles y una **API REST propia** documentada.
 
 | Capa | Tecnología |
 |------|------------|
-| Frontend | HTML5 + CSS3 + JavaScript ES6, **Bootstrap 5**, Bootstrap Icons |
-| Backend | **PHP 8.3** (PDO, sin framework — "PHP puro" organizado) |
+| Frontend | **React 18** + React Router (SPA compilada con **Vite**), **Bootstrap 5**, Bootstrap Icons |
+| Backend | **PHP 8.3** (PDO, sin framework) — solo API REST, sin vistas |
 | Base de datos | **MySQL 8 / MariaDB** |
 | Autenticación | Sesiones PHP + **bcrypt** (`password_hash`), roles admin/cajero |
 | API REST | JSON + métodos HTTP + códigos de estado |
-| APIs externas | **QR Code** (api.qrserver.com) · **OpenWeatherMap** · **Chart.js** · **Google Fonts** |
+| APIs externas | **OpenWeatherMap** · **Chart.js** (react-chartjs-2) · **Google Fonts** |
 | Contenedores | Docker + Docker Compose |
 | Hosting | Railway.app (PHP + MySQL) |
 
@@ -32,16 +32,16 @@ Requisitos: Docker + Docker Compose.
 docker compose up --build
 ```
 
-Luego abrir <http://localhost:8090>
+Luego abrir <http://localhost:8091>
 
-La base de datos se crea y se llena automáticamente con `database/pos_libreria.sql`.
+La base de datos se crea y se llena automáticamente con `database/pos_tienda.sql`.
 
 ### Usuarios de prueba
 
 | Rol | Correo | Contraseña |
 |-----|--------|-----------|
-| Administrador | `admin@libreria.com` | `admin123` |
-| Cajero | `cajero@libreria.com` | `cajero123` |
+| Administrador | `admin@tienda.com` | `admin123` |
+| Cajero | `cajero@tienda.com` | `cajero123` |
 
 > El **admin** puede gestionar inventario, clientes, usuarios y anular ventas.
 > El **cajero** puede vender y consultar, pero no administrar el catálogo.
@@ -67,27 +67,65 @@ cuota gratuita en cada recarga.
 
 ---
 
+## 🧑‍💻 Desarrollo del frontend (React)
+
+El frontend es una SPA en `frontend/`. Para trabajar en él con recarga en
+caliente, levante el backend con Docker y, en otra terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev          # http://localhost:5173
+```
+
+Vite reenvía `/api` y `/uploads` al contenedor (`http://localhost:8091`), así
+que la cookie de sesión funciona igual que en producción. Si el contenedor
+usa otro puerto: `API_URL=http://localhost:9000 npm run dev`.
+
+Pruebas del frontend (Jest + React Testing Library, sin necesidad del backend:
+la API se simula en cada prueba):
+
+```bash
+cd frontend
+npm test
+```
+
+`npm run build` genera `public/app/`, que es lo que sirve Apache. No hace
+falta hacerlo a mano para Docker ni Railway: el `Dockerfile` compila el
+frontend en una etapa con Node y copia solo el resultado a la imagen PHP.
+
+---
+
 ## 📁 Estructura del proyecto
 
 ```
 .
+├── frontend/                # SPA en React (Vite)
+│   ├── src/
+│   │   ├── main.jsx         # Punto de entrada (router + proveedores)
+│   │   ├── App.jsx          # Rutas y protección por sesión / rol
+│   │   ├── pages/           # Pantallas: Dashboard, Pos, Productos, Ventas...
+│   │   ├── components/      # Layout, Modal, Kpi, CampoPassword...
+│   │   ├── lib/             # Cliente de la API, sesión, toasts, formato
+│   │   └── styles.css       # Estilos propios sobre Bootstrap
+│   └── vite.config.js       # Build a public/app + proxy de desarrollo
 ├── public/                  # Document root (lo que sirve Apache)
-│   ├── index.php            # Front controller / router (web + API)
-│   ├── .htaccess            # Reescritura de rutas
-│   ├── assets/              # CSS y JavaScript
+│   ├── index.php            # Router de la API REST (/api/*)
+│   ├── .htaccess            # /api/* -> index.php; resto -> app/index.html
+│   ├── app/                 # Build del frontend (generado, no versionado)
 │   └── uploads/             # Imágenes de productos subidas
 ├── app/
 │   ├── config.php           # Configuración (lee variables de entorno)
 │   ├── db.php               # Conexión PDO
-│   ├── helpers.php          # JSON, auth, roles, render de vistas
-│   ├── controllers/         # Lógica: auth, usuarios, productos, ventas,
-│   │                        #         reportes, clima...
-│   └── views/               # Vistas (Bootstrap): dashboard, pos, factura...
+│   ├── helpers.php          # JSON, sesión, autenticación y roles
+│   └── controllers/         # Lógica: auth, usuarios, productos, ventas,
+│                            #         reportes, clima...
 ├── database/
-│   └── pos_libreria.sql     # Script SQL: estructura + datos de prueba
+│   └── pos_tienda.sql     # Script SQL: estructura + datos de prueba
 ├── docs/                    # Manual, diagrama ER, guía de despliegue
-├── Dockerfile               # Imagen PHP 8.3 + Apache
-└── docker-compose.yml       # Entorno local (web + MySQL)
+├── pruebas/                 # Pruebas de la API con Jest: auth, productos, ganancias (caja negra/blanca/gris)
+├── Dockerfile               # Build de React (Node) + PHP 8.3 + Apache
+└── docker-compose.yml       # Entorno local (web + MySQL + phpMyAdmin)
 ```
 
 ---
@@ -125,9 +163,9 @@ Los endpoints marcados con 🔒 requieren sesión; los marcados con 👑 requier
 
 | Método | Endpoint | Descripción | Códigos |
 |--------|----------|-------------|---------|
-| `GET`    | `/api/productos` 🔒 | Lista productos. Query: `?q=`, `?categoria=`, `?stock_bajo=1` | `200` |
+| `GET`    | `/api/productos` 🔒 | Lista productos. Query: `?q=`, `?categoria=`, `?stock_bajo=1`. A un admin le agrega `precio_compra`, `ganancia` y `margen` | `200` |
 | `GET`    | `/api/productos/{id}` 🔒 | Detalle de un producto | `200`, `404` |
-| `POST`   | `/api/productos` 👑 | Crea un producto (acepta imagen multipart) | `201`, `409`, `422` |
+| `POST`   | `/api/productos` 👑 | Crea un producto. Obligatorios: `codigo`, `nombre`, `precio_compra`, `precio` (venta). Acepta imagen multipart | `201`, `409`, `422` |
 | `PUT`    | `/api/productos/{id}` 👑 | Actualiza un producto | `200`, `404` |
 | `DELETE` | `/api/productos/{id}` 👑 | Baja lógica del producto | `200`, `404` |
 
@@ -167,7 +205,7 @@ Los endpoints marcados con 🔒 requieren sesión; los marcados con 👑 requier
 | Método | Endpoint | Descripción | Códigos |
 |--------|----------|-------------|---------|
 | `GET`  | `/api/ventas` 🔒 | Lista las últimas ventas | `200` |
-| `GET`  | `/api/ventas/{id}` 🔒 | Venta completa con detalle (usada por la factura) | `200`, `404` |
+| `GET`  | `/api/ventas/{id}` 🔒 | Venta completa con los productos vendidos | `200`, `404` |
 | `POST` | `/api/ventas` 🔒 | Registra una venta (transacción atómica) | `201`, `422` |
 | `POST` | `/api/ventas/{id}/anular` 👑 | Anula la venta y devuelve el stock | `200`, `404`, `409` |
 
@@ -178,6 +216,7 @@ Los endpoints marcados con 🔒 requieren sesión; los marcados con 👑 requier
 | `GET` | `/api/reportes/dashboard` 🔒 | KPIs + ventas por día/mes + top productos | `200` |
 | `GET` | `/api/reportes/ventas` 🔒 | Reporte por rango. Query: `?desde=&hasta=` | `200` |
 | `GET` | `/api/reportes/productos-vendidos` 🔒 | Ranking de productos más vendidos | `200` |
+| `GET` | `/api/reportes/rentabilidad` 👑 | Ganancia por producto (más y menos rentables), ganancia bruta, descuentos y ganancia neta. Query: `?desde=&hasta=` | `200`, `403` |
 
 ### Clima (API externa)
 
@@ -208,18 +247,17 @@ servicio externo falla o rechaza la consulta.
 
 **Login**
 ```bash
-curl -c cookies.txt -X POST http://localhost:8090/api/auth/login \
+curl -c cookies.txt -X POST http://localhost:8091/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"correo":"admin@libreria.com","password":"admin123"}'
+  -d '{"correo":"admin@tienda.com","password":"admin123"}'
 ```
 
 **Registrar una venta**
 ```bash
-curl -b cookies.txt -X POST http://localhost:8090/api/ventas \
+curl -b cookies.txt -X POST http://localhost:8091/api/ventas \
   -H "Content-Type: application/json" \
   -d '{
         "id_cliente": 2,
-        "metodo_pago": "QR",
         "descuento": 5,
         "items": [
           { "id_producto": 4, "cantidad": 2 },
@@ -233,9 +271,13 @@ Respuesta (`201 Created`):
 {
   "ok": true,
   "mensaje": "Venta registrada correctamente.",
-  "data": { "id": 7, "subtotal": 40.5, "iva": 4.26, "descuento": 5, "total": 39.76, "...": "..." }
+  "data": { "id": 7, "subtotal": 30, "descuento": 5, "total": 25, "...": "..." }
 }
 ```
+
+Reglas de la tienda que aplica el servidor: los precios del catálogo son
+**finales (sin IVA)**, todas las ventas se cobran **en efectivo** y **no se
+emiten facturas**, así que `total = subtotal − descuento`.
 
 ---
 
@@ -249,8 +291,9 @@ Ver la guía paso a paso en [`docs/DESPLIEGUE_RAILWAY.md`](docs/DESPLIEGUE_RAILW
 
 - Contraseñas con **bcrypt** (`password_hash` / `password_verify`), nunca en texto plano.
 - **Consultas preparadas (PDO)** en todas las consultas → previene inyección SQL.
-- **Escape de salida** (`htmlspecialchars` en PHP y `escapeHtml` en JS) → previene XSS.
-- **Rutas protegidas**: sin sesión no se accede (web redirige a login, API responde `401`).
+- **Escape de salida**: React escapa todo lo que se pinta con `{...}` y el código no usa
+  `dangerouslySetInnerHTML` → previene XSS.
+- **Rutas protegidas**: sin sesión no se accede (la API responde `401` y React manda al login).
 - **Control por roles**: acciones de administración exigen rol admin (`403` si no).
 - `session_regenerate_id()` al iniciar sesión → previene fijación de sesión.
 - Las imágenes subidas **no pueden ejecutarse como PHP** (`.htaccess` en `/uploads`).
@@ -262,6 +305,8 @@ Ver la guía paso a paso en [`docs/DESPLIEGUE_RAILWAY.md`](docs/DESPLIEGUE_RAILW
   degradarse, desactivarse ni borrarse a sí mismo, y siempre debe quedar al menos
   un administrador activo.
 - La **clave de OpenWeather se usa solo en el servidor**; el navegador nunca la ve.
+- El **precio de compra y la ganancia** son información del dueño: la API solo los
+  envía a administradores (a un cajero ni siquiera le llegan en el JSON).
 
 ---
 

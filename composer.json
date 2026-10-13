@@ -1,6 +1,6 @@
 {
-    "name": "umg/pos-libreria",
-    "description": "Sistema de Punto de Venta (POS) Web para Libreria y Papeleria Escolar - UMG Seguridad y Auditoria de Sistemas",
+    "name": "umg/pos-tienda",
+    "description": "Sistema de Punto de Venta (POS) Web para la Tienda Bugambilias - UMG Seguridad y Auditoria de Sistemas",
     "type": "project",
     "license": "MIT",
     "require": {

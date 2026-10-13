@@ -2,7 +2,7 @@
   "name": "pos-web-pruebas",
   "version": "1.0.0",
   "private": true,
-  "description": "Pruebas de caja negra (Jest) sobre la API REST del POS Web — modulo Autenticacion",
+  "description": "Pruebas con Jest sobre la API REST del POS Web: Autenticación (caja negra), Gestión de Productos y Cálculo de Ganancias (caja negra, blanca y gris)",
   "scripts": {
     "test": "jest --runInBand --verbose"
   },

@@ -1,5 +1,5 @@
 flowchart TD
-    A([Cajero en /pos]) --> B["Agrega productos al carrito<br/>elige cliente, método de pago, descuento"]
+    A([Cajero en /pos]) --> B["Agrega productos al carrito<br/>elige cliente (opcional) y descuento"]
     B --> C["POST /api/ventas (JSON con items)"]
     C --> D["require_api_login()"]
     D --> E["BEGIN TRANSACTION"]
@@ -11,13 +11,11 @@ flowchart TD
 
     I --> J{"¿Descuento ><br/>subtotal?"}
     J -->|Sí| H
-    J -->|No| K["Calcula:<br/>IVA 12% · total"]
+    J -->|No| K["total = subtotal − descuento<br/>(sin IVA)"]
 
     K --> L["INSERT ventas (cabecera)"]
     L --> M["INSERT detalle_ventas<br/>+ UPDATE stock = stock - cantidad"]
-    M --> N["INSERT pagos<br/>(genera referencia QR si aplica)"]
+    M --> N["INSERT pagos (monto en efectivo)"]
     N --> O["COMMIT"]
     O --> P["201 → venta completa (JSON)"]
-
-    P --> Q(["Ver factura<br/>GET /ventas/id"])
-    Q --> R["Vista factura.php<br/>+ img QR desde api.qrserver.com"]
+    P --> Q(["Aviso: 'Venta #N registrada: Q X en efectivo'"])
